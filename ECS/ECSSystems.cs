@@ -50,7 +50,10 @@ public interface INone { }
 
 public interface IAny { }
 
-public interface IInjectedFilterParameter { }
+public interface IInjectedFilterParameter
+{
+    ulong GetComponent();
+}
 
 [StructLayout(LayoutKind.Sequential)]
 public struct All<T> : IInjectedFilterParameter, IAll where T : struct
@@ -62,6 +65,8 @@ public struct All<T> : IInjectedFilterParameter, IAll where T : struct
         var world = ECSWorld.Instance!;
         index = world.IndexOf<T>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -74,6 +79,8 @@ public struct All<T1, T2> : IInjectedFilterParameter, IAll where T1 : struct whe
         var world = ECSWorld.Instance!;
         index = world.GetRelationship<T1, T2>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 public struct None<T> : IInjectedFilterParameter, INone where T : struct
@@ -85,6 +92,8 @@ public struct None<T> : IInjectedFilterParameter, INone where T : struct
         var world = ECSWorld.Instance!;
         index = world.IndexOf<T>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 public struct None<T1, T2> : IInjectedFilterParameter, INone where T1 : struct where T2 : struct
@@ -96,6 +105,8 @@ public struct None<T1, T2> : IInjectedFilterParameter, INone where T1 : struct w
         var world = ECSWorld.Instance!;
         index = world.GetRelationship<T1, T2>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 public struct Any<T> : IInjectedFilterParameter, IAny where T : struct
@@ -107,6 +118,8 @@ public struct Any<T> : IInjectedFilterParameter, IAny where T : struct
         var world = ECSWorld.Instance!;
         index = world.IndexOf<T>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 public struct Any<T1, T2> : IInjectedFilterParameter, IAny where T1 : struct where T2 : struct
@@ -118,6 +131,8 @@ public struct Any<T1, T2> : IInjectedFilterParameter, IAny where T1 : struct whe
         var world = ECSWorld.Instance!;
         index = world.GetRelationship<T1, T2>();
     }
+
+    public ulong GetComponent() => index;
 }
 
 public struct FilterInject : IDataInject
@@ -137,7 +152,7 @@ public struct FilterInject : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -197,7 +212,7 @@ public struct FilterInject<C> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -258,7 +273,7 @@ public struct FilterInject<C1, C2> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -320,7 +335,7 @@ public struct FilterInject<C1, C2, C3> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -383,7 +398,7 @@ public struct FilterInject<C1, C2, C3, C4> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -447,7 +462,7 @@ public struct FilterInject<C1, C2, C3, C4, C5> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -512,7 +527,7 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -578,7 +593,7 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);
@@ -645,7 +660,7 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7, C8> : IDataInject
 
         foreach (var parameter in parameters)
         {
-            var component = InjectHelper.GetComponentType(parameter);
+            var component = parameter.GetComponent();
 
             if (parameter is IAll)
                 _hasTypes.Add(component);

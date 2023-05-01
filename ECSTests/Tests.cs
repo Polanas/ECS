@@ -1,7 +1,4 @@
-using BenchmarkDotNet.Filters;
 using ECS;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Drawing;
 
 namespace ECSTests;
 

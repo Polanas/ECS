@@ -14,12 +14,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+    <Compile Remove="Services\**" />
+    <Compile Remove="Systems\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <EmbeddedResource Remove="Systems\**" />
+    <None Remove="Services\**" />
+    <None Remove="Systems\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\" />
-    <Folder Include="Systems\" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
   </ItemGroup>
 
 </Project>
