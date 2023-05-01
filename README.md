@@ -335,7 +335,7 @@ ref var playerStateEvent = ref _world.GetSingletonEvent<PlayerStateEvent>();
 _world.RemoveSingletonEvent<PlayerStateEvent>();
 
 ```
-#### DeleteHere
+### DeleteHere
 DeleteHere is a helper system that deletes a specified component for all entites.
 ```cs
 systems
