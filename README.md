@@ -5,6 +5,8 @@ Main features:
 * User-friendly API
 * Support of injection, system groups, prefabs and events
 
+> Note: don't forget to build in RELEASE when you don't need additional checks and helpful exceptions.
+
 ## Usage overview
 ### World
 A world stores entites, components, filters, etc.
