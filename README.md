@@ -1,4 +1,4 @@
-An Entity Component System library based on [RelECS](https://github.com/Byteron/RelEcs), with major inspiration from [leoecs](https://github.com/Leopotam/ecs) and [flecs](https://github.com/SanderMertens/flecs).
+An Entity Component System library based on [RelECS](https://github.com/Byteron/RelEcs), with major inspiration from [ecslite](https://github.com/Leopotam/ecs) and [flecs](https://github.com/SanderMertens/flecs).
 
 Main features:
 * Heavy support of relationships
