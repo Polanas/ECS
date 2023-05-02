@@ -603,7 +603,7 @@ public sealed class Archetypes
                 newTable = TryGetTable(newTypes)!;
             }
             newTable ??= reuseTable ? oldArchetype.Table : new Table(this, newTypes, finalComponentsCapacity, relationshipsCapacity);
-            var newArchetypeRef = AddArchetype(newTable, newTypes);
+            var newArchetypeRef = AddArchetype(newTable, newTypes, finalComponentsCapacity != singletonComponentCapacity ? -1 : singletonComponentCapacity);
             newArchetype ??= ((Archetype?)newArchetypeRef.Target)!;
             oldEdge.Add = newArchetypeRef;
 
@@ -1756,9 +1756,10 @@ public sealed class Archetypes
         else return false;
     }
 
-    private WeakReference AddArchetype(Table table, SortedSet<ulong> types)
+    private WeakReference AddArchetype(Table table, SortedSet<ulong> types, int customCapacity = -1)
     {
-        var archetype = new Archetype(table, _archetypes.Count, this, types, GetArchetypeCapacity(types));
+        var finalCapacity = customCapacity == -1 ? GetArchetypeCapacity(types) : customCapacity;
+        var archetype = new Archetype(table, _archetypes.Count, this, types, finalCapacity);
         var archetypeRef = new WeakReference(archetype);
         _archetypes.Add(archetypeRef);
 
