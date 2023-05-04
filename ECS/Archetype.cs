@@ -22,7 +22,7 @@ public sealed class Archetype
 
     private readonly Archetypes _archetypes;
     private ulong[] _entities;
-    private Dictionary<ulong, ArchetypeEdge> _edges;
+    private readonly Dictionary<ulong, ArchetypeEdge> _edges;
     private readonly Table _table;
 
     public Archetype(Table table, int id, Archetypes archetypes, SortedSet<ulong> components, int capacity)
