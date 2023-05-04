@@ -536,20 +536,22 @@ public class UnitTests
     [TestMethod]
     public void FilterAnyTest()
     {
-        int extected = 4;
+        int extected = 3;
         int actual = 0;
 
         var filter = _world.Filter().Any<Likes, People>().Any<Hates, Wildcard>().Build();
         _world.AddEntity().Add<Likes, People>();
         _world.AddEntity().Add<Hates, People>();
         _world.AddEntity().Add<Hates, People>().Add<Likes, People>();
-        _world.AddEntity().Add<Hates, Apples>();
+        var entity = _world.AddEntity().Add<MyRelation, Apples>();
 
         foreach (var entry in filter)
         {
             actual++;
             entry.entity.Remove();
         }
+
+        entity.Remove();
 
         Assert.AreEqual(extected, actual);
     }
@@ -698,7 +700,7 @@ public class UnitTests
         _testInjectSystems.Update();
         var actual = _testInjectSystems.GetSystem<TestInjectSystem>().value;
 
-        Assert.AreEqual(actual, expected);
+        Assert.AreEqual(expected, actual);
     }
 
     [TestMethod]
@@ -709,7 +711,7 @@ public class UnitTests
         _testSystems.Update();
         var actual = _testSystems.GetSystem<TestSystem>().value;
 
-        Assert.AreEqual(actual, expected);
+        Assert.AreEqual(expected, actual);
     }
 
     [TestMethod]
@@ -805,7 +807,6 @@ public class UnitTests
         Assert.AreEqual(expected, actual);
     }
 
-    //Current commit : fix a bug where when deliting components in filter, reuseTable was always true
     [TestMethod]
     public void OnComponentSystemTest()
     {

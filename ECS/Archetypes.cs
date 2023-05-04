@@ -1709,7 +1709,7 @@ public sealed class Archetypes
         return true;
     }
 
-    //TODO: finish with any support
+
     private bool MaskCompatibleWithAny(Mask mask, Archetype archetype)
     {
         if (mask.hasTypes.Count > archetype.components.Count)
@@ -1721,7 +1721,7 @@ public sealed class Archetypes
                 return false;
         }
 
-        if (!ArchetypeHasAnyType(archetype, mask.anyTypes))
+        if (mask.anyTypes.Count > 0 && !ArchetypeHasAnyType(archetype, mask.anyTypes))
             return false;
 
         foreach (var hasType in mask.hasTypes)
@@ -1836,7 +1836,7 @@ public sealed class Archetypes
                 if (filterRef.Target is not Filter filter)
                     continue;
 
-                if (!MaskCompatibleWith(filter.Mask, archetype))
+                if (!MaskCompatibleWithAny(filter.Mask, archetype))
                     continue;
 
                 filter.AddArchetype(archetype);
