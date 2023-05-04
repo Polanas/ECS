@@ -751,15 +751,13 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
     public virtual void OnComponentAdd(Entity entity) { }
     public virtual void OnComponentRemove(Entity entity) { }
 
-    public OnComponentActionSystem All<T>() where T : struct
+    public void All<T>() where T : struct
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
         allComponents.Add(component);
-
-        return this;
     }
 
-    public OnComponentActionSystem All<T1, T2>() where T1 : struct where T2 : struct
+    public void All<T1, T2>() where T1 : struct where T2 : struct
     {
         var world = ECSWorld.Instance!;
 
@@ -768,19 +766,15 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
         allComponents.Add(relationship);
-
-        return this;
     }
 
-    public OnComponentActionSystem None<T>() where T : struct
+    public void None<T>() where T : struct
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
         noneComponents.Add(component);
-
-        return this;
     }
 
-    public OnComponentActionSystem None<T1, T2>() where T1 : struct where T2 : struct
+    public void None<T1, T2>() where T1 : struct where T2 : struct
     {
         var world = ECSWorld.Instance!;
 
@@ -789,19 +783,15 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
         noneComponents.Add(relationship);
-
-        return this;
     }
 
-    protected OnComponentActionSystem Any<T>() where T : struct
+    protected void Any<T>() where T : struct
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
         anyComponents.Add(component);
-
-        return this;
     }
 
-    protected OnComponentActionSystem Any<T1, T2>() where T1 : struct where T2 : struct
+    protected void Any<T1, T2>() where T1 : struct where T2 : struct
     {
         var world = ECSWorld.Instance!;
 
@@ -810,8 +800,6 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
         anyComponents.Add(relationship);
-
-        return this;
     }
 }
 
