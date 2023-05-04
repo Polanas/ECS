@@ -204,12 +204,12 @@ public sealed class Archetypes
     private readonly Dictionary<ulong, List<WeakReference>> _archetypesByHashes;
     private readonly Dictionary<ulong, List<WeakReference>> _tablesByHash;
     private readonly Dictionary<ulong, ArchetypeOperationStorage> _archetypeOperationStorages;
-    private readonly Dictionary<SortedSet<ulong>, OnComponentSystems> _onComponentSystemsByTypes;
     private readonly Dictionary<ulong, HashSet<Archetype>> _archetypesByTypes;
     private readonly Dictionary<ulong, Filter> _childrenFilters;
     private readonly List<WeakReference> _archetypes;
     private readonly List<ArchetypeOperation> _archetypeOperations;
-    private readonly List<OnComponentActionSystem> _onComponentSystemsList;
+    private readonly List<OnComponentActionSystem> _onComponentSystems;
+    private readonly Dictionary<int, List<OnComponentActionSystem>> _onComponentSystemsByArchetypeIds;
     private EntityRecord[] _entityRecords;
     private readonly ECSWorld _world;
     private uint _entityCount = 1;
@@ -227,14 +227,14 @@ public sealed class Archetypes
         _filtersWithTagsByTypes = new();
         _entitesByNames = new();
         _namesByEntities = new();
-        _onComponentSystemsList = new();
-        _onComponentSystemsByTypes = new();
+        _onComponentSystems = new();
         _childrenFilters = new();
         _archetypeOperationStorages = new();
         _archetypeOperations = new();
         _tablesByHash = new();
         _archetypesByTypes = new();
         _archetypesByHashes = new();
+        _onComponentSystemsByArchetypeIds = new();
         wildCardRelationship = IdConverter.Compose(wildCard32, wildCard32, true);
 
         TypeData.AddTypeAndIndex(typeof(Entity), entityType);
@@ -287,17 +287,17 @@ public sealed class Archetypes
                     if (!HasComponent(operation.type, operation.entity))
                         continue;
 
-                    RemoveComponent(operation.type, operation.entity, out var archetype, out _);
+                    RemoveComponent(operation.type, operation.entity, out var archetype, out _, operation.index == -1);
 
                     if (operation.type != componentType)
-                        TryCallOnComponentAddSystems(operation.entity, archetype.components);
+                        TryCallOnComponentAddSystems(operation.entity, archetype);
                     break;
                 case ArchetypeOperationType.AddComponent:
                     if (!HasComponent(operation.type, operation.entity))
                     {
                         AddComponent(operation.type, operation.entity, out archetype, out int row, operation.index == -1);
                         if (operation.type != componentType)
-                            TryCallOnComponentAddSystems(operation.entity, archetype.components);
+                            TryCallOnComponentAddSystems(operation.entity, archetype);
                     }
 
                     if (operation.index == -1)
@@ -682,7 +682,7 @@ public sealed class Archetypes
         AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
 
         if (typeIndex != componentType)
-            TryCallOnComponentAddSystems(entity, newArchetype!.components);
+            TryCallOnComponentAddSystems(entity, newArchetype);
 
         if (!EqualityComparer<T>.Default.Equals(value, fakeInstace))
             item = value;
@@ -792,7 +792,7 @@ public sealed class Archetypes
         record.tableRow = newTableRow;
         record.archetypeId = newArchetype.id;
 
-        TryCallOnComponentAddSystems(entity, newArchetype.components);
+        TryCallOnComponentAddSystems(entity, newArchetype);
 
         var storage = newArchetype.GetStorage<T>();
         storage[newTableRow] = default;
@@ -860,7 +860,7 @@ public sealed class Archetypes
         record.archetypeId = newArchetype!.id;
         record.archetypeRow = newArchetypeRow;
 
-        TryCallOnComponentRemoveSystems(entity, oldArchetype.components);
+        TryCallOnComponentRemoveSystems(entity, newArchetype);
 
         if (oldArchetype!.components.Count == 1)
             RemoveEntity(entity);
@@ -1511,6 +1511,7 @@ public sealed class Archetypes
         }
 
         AddComponent(relationship, entity, out _, out _, true);
+        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!);
     }
 
     public bool HasRelationship(Entity entity, Entity relation, Entity target)
@@ -1588,6 +1589,7 @@ public sealed class Archetypes
         }
 
         AddComponent(relationship, entity, out var archetype, out var newTableRow, false);
+        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!);
         var storage = archetype.GetStorage<T>(relationship);
         return ref storage[newTableRow];
     }
@@ -1658,6 +1660,32 @@ public sealed class Archetypes
             matchingArchetypes.Add(matchingArchetype);
     }
 
+    private bool ComponentsCompatibleOnlyWith(SortedSet<ulong> allComponents,
+                                     SortedSet<ulong> noneComponents,
+                                     SortedSet<ulong> anyComponents,
+                                     Archetype archetype)
+    {
+        if (allComponents.Count != archetype.components.Count)
+            return false;
+
+        foreach (var noneComponent in noneComponents)
+        {
+            if (HasComponent(noneComponent, archetype))
+                return false;
+        }
+
+        foreach (var allComponent in allComponents)
+        {
+            if (IdConverter.IsRelationship(allComponent) && TypeCompatibleWith(archetype.components, allComponent))
+                continue;
+
+            if (!HasComponent(allComponent, archetype))
+                return false;
+        }
+
+        return true;
+    }
+
     private bool MaskCompatibleWith(Mask mask, Archetype archetype)
     {
         if (mask.hasTypes.Count > archetype.components.Count)
@@ -1681,6 +1709,7 @@ public sealed class Archetypes
         return true;
     }
 
+    //TODO: finish with any support
     private bool MaskCompatibleWithAny(Mask mask, Archetype archetype)
     {
         if (mask.hasTypes.Count > archetype.components.Count)
@@ -1691,7 +1720,6 @@ public sealed class Archetypes
             if (HasComponent(notType, archetype))
                 return false;
         }
-
 
         if (!ArchetypeHasAnyType(archetype, mask.anyTypes))
             return false;
@@ -1784,6 +1812,23 @@ public sealed class Archetypes
             GetArchetypesWithType(wildCardRelationship).Add(archetype);
         }
 
+        foreach (var onComponentSystem in _onComponentSystems)
+        {
+            if (!ComponentsCompatibleOnlyWith(onComponentSystem.allComponents,
+                                         onComponentSystem.noneComponents,
+                                         onComponentSystem.allComponents,
+                                         archetype))
+                continue;
+
+            if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
+            {
+                onComponentSystems = new();
+                _onComponentSystemsByArchetypeIds[archetype.id] = onComponentSystems;
+            }
+
+            onComponentSystems.Add(onComponentSystem);
+        }
+
         foreach (var filterRefList in _filtersByHash.Values)
         {
             foreach (var filterRef in filterRefList)
@@ -1860,93 +1905,26 @@ public sealed class Archetypes
         return oldEntity;
     }
 
-    private void TryCallOnComponentAddSystems(Entity entity, SortedSet<ulong> types)
+    private void TryCallOnComponentAddSystems(Entity entity, Archetype archetype)
     {
-        if (!_onComponentSystemsByTypes.TryGetValue(types, out var onComponentSystems))
+        if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
+            return;
+        
+        foreach (var onComponentSystem in onComponentSystems!)
         {
-            onComponentSystems = new();
-            onComponentSystems.systemsExist = InitOnComponentSystems(types, ref onComponentSystems.systems!);
-
-            _onComponentSystemsByTypes[types] = onComponentSystems;
+            onComponentSystem.OnComponentAdd(entity);
         }
+    }
 
-        if (!onComponentSystems.systemsExist)
+    private void TryCallOnComponentRemoveSystems(Entity entity, Archetype archetype)
+    {
+        if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
             return;
 
-        var systems = onComponentSystems.systems!;
-        for (int i = 0; i < systems.Count; i++)
+        foreach (var onComponentSystem in onComponentSystems!)
         {
-            systems[i].OnAddActionHandler(entity);
+            onComponentSystem.OnComponentRemove(entity);
         }
-    }
-
-    private void TryCallOnComponentRemoveSystems(Entity entity, SortedSet<ulong> types)
-    {
-        if (!_onComponentSystemsByTypes.TryGetValue(types, out var onComponentSystems))
-        {
-            onComponentSystems = new();
-            onComponentSystems.systemsExist = InitOnComponentSystems(types, ref onComponentSystems.systems!);
-
-            _onComponentSystemsByTypes[types] = onComponentSystems;
-        }
-
-        if (!onComponentSystems.systemsExist)
-            return;
-
-        var systems = onComponentSystems.systems!;
-        for (int i = 0; i < systems.Count; i++)
-        {
-            systems[i].OnRemoveActionHandler(entity);
-        }
-    }
-
-    private bool InitOnComponentSystems(SortedSet<ulong> types, ref List<OnComponentActionSystem> onComponentSystems)
-    {
-        bool systemsExist = false;
-
-        for (int i = 0; i < _onComponentSystemsList.Count; i++)
-        {
-            var system = _onComponentSystemsList[i];
-
-            if (CompareTypes(system, types))
-            {
-                systemsExist = true;
-
-                if (onComponentSystems == null)
-                {
-                    onComponentSystems = new List<OnComponentActionSystem> { system };
-                    continue;
-                }
-
-                onComponentSystems.Add(system);
-            }
-        }
-
-        return systemsExist;
-    }
-
-    private bool CompareTypes(OnComponentActionSystem onComponentActionSystem, SortedSet<ulong> types)
-    {
-        var systemTypes = onComponentActionSystem.types;
-        if (systemTypes.Length != types.Count)
-            return false;
-
-        int i = 0;
-        foreach (ulong type in types)
-        {
-            if (type == 0)
-                continue;
-
-            if (GetComponentIndex(systemTypes[i]) == type)
-            {
-                i++;
-                continue;
-            }
-
-            return false;
-        }
-
-        return true;
     }
 
     private void AddOnComponentSystems(IEnumerable<ISystem> systems)
@@ -1956,7 +1934,7 @@ public sealed class Archetypes
             switch (system)
             {
                 case OnComponentActionSystem onComponentActionSystem:
-                    _onComponentSystemsList.Add(onComponentActionSystem);
+                    _onComponentSystems.Add(onComponentActionSystem);
                     break;
             }
         }

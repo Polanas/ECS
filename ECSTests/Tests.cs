@@ -60,6 +60,27 @@ public class TestSystem : IInitSystem, IUpdateSystem
         value = 1;
     }
 }
+struct MyRelation { }
+
+public class OnComponentSystemTest : OnComponentActionSystem
+{
+    public int value;
+
+    public OnComponentSystemTest()
+    {
+        All<Position>().All<MyRelation, Wildcard>();
+    }
+
+    public override void OnComponentAdd(Entity entity)
+    {
+        value++;
+    }
+
+    public override void OnComponentRemove(Entity entity)
+    {
+        value++;
+    }
+}
 
 public class TestInjectSystem : IUpdateSystem, IInitSystem
 {
@@ -149,6 +170,7 @@ public class UnitTests
     private static ECSSystems _testSystems = null!;
     private static ECSSystems _serviceSystems = null!;
     private static ECSSystems _testGroupSystems = null!;
+    private static ECSSystems _testActionSystems = null!;
 
     [ClassInitialize]
     public static void Init(TestContext testContext)
@@ -175,6 +197,11 @@ public class UnitTests
         _testGroupSystems
             .AddGroup("TestGroup", false, new GroupTestSystem1(), new GroupTestSystem2())
             .Inject()
+            .Init();
+
+        _testActionSystems = new(_world);
+        _testActionSystems
+            .Add(new OnComponentSystemTest())
             .Init();
     }
 
@@ -774,6 +801,26 @@ public class UnitTests
 
         prefab.Remove();
         entity.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    //Current commit : fix a bug where when deliting components in filter, reuseTable was always true
+    [TestMethod]
+    public void OnComponentSystemTest()
+    {
+        int expected = 2;
+
+        _testActionSystems.Update();
+
+        var entity = _world.AddEntity().Add<Position>().Add<MyRelation, Apples>();
+        var entity1 = _world.AddEntity().Add<Position>();
+        entity.Add<Velocity>().Remove<Velocity>();
+
+        var actual = _testActionSystems.GetSystem<OnComponentSystemTest>().value;
+
+        entity.Remove();
+        entity1.Remove();
 
         Assert.AreEqual(expected, actual);
     }

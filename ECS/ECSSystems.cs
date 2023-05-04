@@ -735,126 +735,87 @@ public interface IOnComponentActionSystem
     void OnComponentRemove(Entity entity);
 }
 
-public abstract class OnComponentActionSystem : IOnComponentActionSystem
+public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISystem
 {
-    internal Type[] types = null!;
-    internal OnComponentActionHandler OnAddActionHandler = null!;
-    internal OnComponentActionHandler OnRemoveActionHandler = null!;
+    internal SortedSet<ulong> allComponents = null!;
+    internal SortedSet<ulong> noneComponents = null!;
+    internal SortedSet<ulong> anyComponents = null!;
 
     public OnComponentActionSystem()
     {
-        var onAddMethod = typeof(IOnComponentActionSystem)!.GetMethod(nameof(IOnComponentActionSystem.OnComponentAdd))!;
-        OnAddActionHandler = (OnComponentActionHandler)Delegate.CreateDelegate(typeof(OnComponentActionHandler), this, onAddMethod);
-
-        var onRemoveMethod = typeof(IOnComponentActionSystem)!.GetMethod(nameof(IOnComponentActionSystem.OnComponentRemove))!;
-        OnRemoveActionHandler = (OnComponentActionHandler)Delegate.CreateDelegate(typeof(OnComponentActionHandler), this, onRemoveMethod);
+        allComponents = new();
+        noneComponents = new();
+        anyComponents = new();
     }
 
     public virtual void OnComponentAdd(Entity entity) { }
     public virtual void OnComponentRemove(Entity entity) { }
+
+    public OnComponentActionSystem All<T>() where T : struct
+    {
+        var component = ECSWorld.Instance!.IndexOf<T>();
+        allComponents.Add(component);
+
+        return this;
+    }
+
+    public OnComponentActionSystem All<T1, T2>() where T1 : struct where T2 : struct
+    {
+        var world = ECSWorld.Instance!;
+
+        var relationId = IdConverter.GetFirst(world.IndexOf<T1>());
+        var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
+
+        var relationship = IdConverter.Compose(relationId, targetId, true);
+        allComponents.Add(relationship);
+
+        return this;
+    }
+
+    public OnComponentActionSystem None<T>() where T : struct
+    {
+        var component = ECSWorld.Instance!.IndexOf<T>();
+        noneComponents.Add(component);
+
+        return this;
+    }
+
+    public OnComponentActionSystem None<T1, T2>() where T1 : struct where T2 : struct
+    {
+        var world = ECSWorld.Instance!;
+
+        var relationId = IdConverter.GetFirst(world.IndexOf<T1>());
+        var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
+
+        var relationship = IdConverter.Compose(relationId, targetId, true);
+        noneComponents.Add(relationship);
+
+        return this;
+    }
+
+    protected OnComponentActionSystem Any<T>() where T : struct
+    {
+        var component = ECSWorld.Instance!.IndexOf<T>();
+        anyComponents.Add(component);
+
+        return this;
+    }
+
+    protected OnComponentActionSystem Any<T1, T2>() where T1 : struct where T2 : struct
+    {
+        var world = ECSWorld.Instance!;
+
+        var relationId = IdConverter.GetFirst(world.IndexOf<T1>());
+        var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
+
+        var relationship = IdConverter.Compose(relationId, targetId, true);
+        anyComponents.Add(relationship);
+
+        return this;
+    }
 }
 
 internal delegate void OnComponentActionHandler(Entity entity);
-
-public abstract class OnComponentActionSystem<C> : OnComponentActionSystem
-    where C : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3, C4> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-    where C4 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3), typeof(C4) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3, C4, C5> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-    where C4 : struct
-    where C5 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3), typeof(C4), typeof(C5) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3, C4, C5, C6> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-    where C4 : struct
-    where C5 : struct
-    where C6 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3), typeof(C4), typeof(C5), typeof(C6) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3, C4, C5, C6, C7> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-    where C4 : struct
-    where C5 : struct
-    where C6 : struct
-    where C7 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3), typeof(C4), typeof(C5), typeof(C6), typeof(C7) };
-    }
-}
-
-public abstract class OnComponentActionSystem<C1, C2, C3, C4, C5, C6, C7, C8> : OnComponentActionSystem
-    where C1 : struct
-    where C2 : struct
-    where C3 : struct
-    where C4 : struct
-    where C5 : struct
-    where C6 : struct
-    where C7 : struct
-    where C8 : struct
-{
-    public OnComponentActionSystem() : base()
-    {
-        types = new Type[] { typeof(C1), typeof(C2), typeof(C3), typeof(C4), typeof(C5), typeof(C6), typeof(C7), typeof(C8) };
-    }
-}
 
 public interface IGroupSystem
 {

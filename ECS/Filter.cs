@@ -42,7 +42,7 @@ public struct Pair1<T1, T2> : IPair1, IPair where T1 : struct where T2 : struct
         var type = typeof(T1);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T1>())
-            throw new Exception($"{type.Name} is unmanaged; _data relationship cannot contain unmanaged components");
+            throw new Exception($"{type.Name} is unmanaged; _data relationship cannot contain unmanaged allComponents");
     }
 #endif
 }
@@ -81,7 +81,7 @@ public struct Pair2<T1, T2> : IPair2, IPair where T1 : struct where T2 : struct
         var type = typeof(T2);
 
         if (RuntimeHelpers.IsReferenceOrContainsReferences<T2>())
-            throw new Exception($"{type.Name} is unmanaged; _data relationship cannot contain unmanaged components");
+            throw new Exception($"{type.Name} is unmanaged; _data relationship cannot contain unmanaged allComponents");
     }
 #endif
 }
