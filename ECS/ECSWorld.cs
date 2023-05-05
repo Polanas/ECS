@@ -447,11 +447,7 @@ public sealed class ECSWorld
         var index = IndexOf<T>();
 
         if (!HasComponent<T>(index))
-#if DEBUG
-            throw new Exception("Singleton event hasn't been created yet.");
-#else
             AddSingletonEvent<T>();
-#endif
 
         return ref _archetypes.GetComponent<T>(index, index);
     }
