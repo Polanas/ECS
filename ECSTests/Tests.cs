@@ -68,7 +68,8 @@ public class OnComponentSystemTest : OnComponentActionSystem
 
     public OnComponentSystemTest()
     {
-        All<Position>().All<MyRelation, Wildcard>();
+        All<Position>();
+        All<MyRelation, Wildcard>();
     }
 
     public override void OnComponentAdd(Entity entity)

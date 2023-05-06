@@ -668,9 +668,8 @@ public sealed class Archetypes
 
             ref var item1 = ref AddArchetypeOperation<T>(entity, GetComponentIndex<T>(), ArchetypeOperationType.AddComponent);
 
+            item1 = value;
             AutoResets<T>.Handler?.Invoke(ref item1, AutoResetState.OnAdd);
-            if (!EqualityComparer<T>.Default.Equals(value, fakeInstace))
-                item1 = value;
 
             return;
         }
@@ -679,13 +678,11 @@ public sealed class Archetypes
 
         ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
         item = fakeInstace;
+        item = value;
         AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
 
         if (typeIndex != componentType)
             TryCallOnComponentAddSystems(entity, newArchetype);
-
-        if (!EqualityComparer<T>.Default.Equals(value, fakeInstace))
-            item = value;
     }
 
     public void AddTagEvent<T>(ulong typeIndex, Entity entity) where T : struct
@@ -798,9 +795,8 @@ public sealed class Archetypes
         storage[newTableRow] = default;
 
         ref var item = ref storage[newTableRow];
-        AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
-
         item = value;
+        AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
     }
 
     public bool RemoveComponent(ulong typeIndex, Entity entity, out Archetype newArchetype, out bool isNewArchetypeNull, bool reuseTable = false)
@@ -1909,7 +1905,7 @@ public sealed class Archetypes
     {
         if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
             return;
-        
+
         foreach (var onComponentSystem in onComponentSystems!)
         {
             onComponentSystem.OnComponentAdd(entity);
