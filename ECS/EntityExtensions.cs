@@ -66,6 +66,18 @@ public static class EntityExtensions
         return target;
     }
 
+    public static Entity Get<T>(this Entity entity, out T component) where T : struct
+    {
+        component = entity.world.GetComponent<T>(entity);
+        return entity;
+    }
+
+    public static Entity Get<T>(this Entity entity, Entity target, out T component) where T : struct
+    {
+        component = entity.world.GetRelationship<T>(entity, target);
+        return entity;
+    }
+
     public static ref T Get<T>(this Entity entity) where T : struct =>
         ref entity.world.GetComponent<T>(entity);
 
@@ -150,6 +162,18 @@ public static class EntityExtensions
     public static Entity Set2<T1, T2>(this Entity entity, T2 value) where T1 : struct where T2 : struct
     {
         entity.world.GetRelationship2<T1, T2>(entity) = value;
+        return entity;
+    }
+
+    public static Entity Get1<T1, T2>(this Entity entity, out T1 component) where T1 : struct where T2 : struct
+    {
+        component = entity.world.GetRelationship1<T1, T2>(entity);
+        return entity;
+    }
+
+    public static Entity Get2<T1, T2>(this Entity entity, out T2 component) where T1 : struct where T2 : struct
+    {
+        component = entity.world.GetRelationship2<T1, T2>(entity);
         return entity;
     }
 

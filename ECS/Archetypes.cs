@@ -428,7 +428,7 @@ public sealed class Archetypes
         if (_entityRecords.Length == _entityCount)
         {
             Array.Resize(ref _entityRecords, (int)(_entityCount << 1));
-            Array.Fill(_entityRecords, new() { archetypeId = -1, archetypeRow = -1, tableRow = -1 });
+            Array.Fill(_entityRecords, new() { archetypeId = -1, archetypeRow = -1, tableRow = -1 }, (int)_entityCount, _entityRecords.Length - (int)_entityCount);
         }
 
         _entityRecords[id] = new EntityRecord() { archetypeRow = archetypeRow, tableRow = tableRow, archetypeId = archetype.id, entity = entityValue };
