@@ -742,7 +742,6 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
     internal SortedSet<ulong> noneComponents = null!;
     internal SortedSet<ulong> anyComponents = null!;
     internal HashSet<ulong> anyComponentsHashset = null!;
-    private bool _implementsOnComponentRemove;
 
     public OnComponentActionSystem()
     {
@@ -752,12 +751,6 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
 
         anyComponentsHashset = new();
         allComponentsHashset = new();
-
-        var type = GetType();
-        var onComponentRemove = type.GetMethod(nameof(OnComponentRemove));
-        _implementsOnComponentRemove = 
-            onComponentRemove!.DeclaringType == type ||
-            onComponentRemove.GetBaseDefinition().DeclaringType == type;
     }
     
     public virtual void OnComponentAdd(Entity entity) { }
