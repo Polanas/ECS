@@ -738,16 +738,28 @@ public interface IOnComponentActionSystem
 public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISystem
 {
     internal SortedSet<ulong> allComponents = null!;
+    internal HashSet<ulong> allComponentsHashset = null!;
     internal SortedSet<ulong> noneComponents = null!;
     internal SortedSet<ulong> anyComponents = null!;
+    internal HashSet<ulong> anyComponentsHashset = null!;
+    private bool _implementsOnComponentRemove;
 
     public OnComponentActionSystem()
     {
         allComponents = new();
         noneComponents = new();
         anyComponents = new();
-    }
 
+        anyComponentsHashset = new();
+        allComponentsHashset = new();
+
+        var type = GetType();
+        var onComponentRemove = type.GetMethod(nameof(OnComponentRemove));
+        _implementsOnComponentRemove = 
+            onComponentRemove!.DeclaringType == type ||
+            onComponentRemove.GetBaseDefinition().DeclaringType == type;
+    }
+    
     public virtual void OnComponentAdd(Entity entity) { }
     public virtual void OnComponentRemove(Entity entity) { }
 
@@ -755,6 +767,9 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
         allComponents.Add(component);
+        allComponentsHashset.Add(component);
+
+        AddAll(component);
     }
 
     public void All<T1, T2>() where T1 : struct where T2 : struct
@@ -765,13 +780,14 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
         var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
-        allComponents.Add(relationship);
+
+        AddAll(relationship);
     }
 
     public void None<T>() where T : struct
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
-        noneComponents.Add(component);
+        AddNone(component);
     }
 
     public void None<T1, T2>() where T1 : struct where T2 : struct
@@ -782,13 +798,13 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
         var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
-        noneComponents.Add(relationship);
+        AddNone(relationship);
     }
 
     protected void Any<T>() where T : struct
     {
         var component = ECSWorld.Instance!.IndexOf<T>();
-        anyComponents.Add(component);
+        AddAny(component);
     }
 
     protected void Any<T1, T2>() where T1 : struct where T2 : struct
@@ -799,7 +815,24 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
         var targetId = IdConverter.GetFirst(world.IndexOf<T2>());
 
         var relationship = IdConverter.Compose(relationId, targetId, true);
-        anyComponents.Add(relationship);
+        AddAny(relationship);
+    }
+
+    private void AddAll(ulong component)
+    {
+        allComponents.Add(component);
+        allComponentsHashset.Add(component);
+    }
+
+    private void AddNone(ulong component)
+    {
+        noneComponents.Add(component);
+    }
+
+    private void AddAny(ulong component)
+    {
+        anyComponents.Add(component);
+        anyComponentsHashset.Add(component);
     }
 }
 

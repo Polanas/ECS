@@ -275,6 +275,8 @@ public sealed class Archetypes
 
         _locked = false;
 
+        Archetype? oldArchetype;
+
         for (int i = 0; i < _archetypeOperations.Count; i++)
         {
             var operation = _archetypeOperations[i];
@@ -287,24 +289,25 @@ public sealed class Archetypes
                     if (!HasComponent(operation.type, operation.entity))
                         continue;
 
-                    RemoveComponent(operation.type, operation.entity, out var archetype, out _, operation.index == -1);
+                    oldArchetype = GetArchetype(operation.entity);
+                    RemoveComponent(operation.type, operation.entity, out _, out _, operation.index == -1);
 
                     if (operation.type != componentType)
-                        TryCallOnComponentAddSystems(operation.entity, archetype);
+                        TryCallOnComponentRemoveSystems(operation.entity, oldArchetype, operation.type);
                     break;
                 case ArchetypeOperationType.AddComponent:
                     if (!HasComponent(operation.type, operation.entity))
                     {
-                        AddComponent(operation.type, operation.entity, out archetype, out int row, operation.index == -1);
+                        AddComponent(operation.type, operation.entity, out var archetype, out _, operation.index == -1);
                         if (operation.type != componentType)
-                            TryCallOnComponentAddSystems(operation.entity, archetype);
+                            TryCallOnComponentAddSystems(operation.entity, archetype, operation.type);
                     }
 
                     if (operation.index == -1)
                         continue;
 
                     ref var record = ref GetEntityRecord(operation.entity);
-                    var oldArchetype = (Archetype?)_archetypes[record.archetypeId].Target!;
+                    oldArchetype = (Archetype?)_archetypes[record.archetypeId].Target!;
                     var storage = _archetypeOperationStorages[operation.type];
                     Array.Copy(storage.array, operation.index, oldArchetype.GetStorage(operation.type), record.tableRow, 1);
 
@@ -682,7 +685,7 @@ public sealed class Archetypes
         AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
 
         if (typeIndex != componentType)
-            TryCallOnComponentAddSystems(entity, newArchetype);
+            TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
     }
 
     public void AddTagEvent<T>(ulong typeIndex, Entity entity) where T : struct
@@ -789,7 +792,7 @@ public sealed class Archetypes
         record.tableRow = newTableRow;
         record.archetypeId = newArchetype.id;
 
-        TryCallOnComponentAddSystems(entity, newArchetype);
+        TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
 
         var storage = newArchetype.GetStorage<T>();
         storage[newTableRow] = default;
@@ -856,7 +859,7 @@ public sealed class Archetypes
         record.archetypeId = newArchetype!.id;
         record.archetypeRow = newArchetypeRow;
 
-        TryCallOnComponentRemoveSystems(entity, newArchetype);
+        TryCallOnComponentRemoveSystems(entity, oldArchetype, typeIndex);
 
         if (oldArchetype!.components.Count == 1)
             RemoveEntity(entity);
@@ -1507,7 +1510,7 @@ public sealed class Archetypes
         }
 
         AddComponent(relationship, entity, out _, out _, true);
-        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!);
+        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!, relationship);
     }
 
     public bool HasRelationship(Entity entity, Entity relation, Entity target)
@@ -1585,7 +1588,7 @@ public sealed class Archetypes
         }
 
         AddComponent(relationship, entity, out var archetype, out var newTableRow, false);
-        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!);
+        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!, relationship);
         var storage = archetype.GetStorage<T>(relationship);
         return ref storage[newTableRow];
     }
@@ -1661,14 +1664,14 @@ public sealed class Archetypes
                                      SortedSet<ulong> anyComponents,
                                      Archetype archetype)
     {
-        if (allComponents.Count != archetype.components.Count)
-            return false;
-
         foreach (var noneComponent in noneComponents)
         {
             if (HasComponent(noneComponent, archetype))
                 return false;
         }
+
+        if (!ArchetypeHasAnyType(archetype, anyComponents))
+            return false;
 
         foreach (var allComponent in allComponents)
         {
@@ -1901,24 +1904,98 @@ public sealed class Archetypes
         return oldEntity;
     }
 
-    private void TryCallOnComponentAddSystems(Entity entity, Archetype archetype)
+    private void TryCallOnComponentAddSystems(
+        Entity entity,
+        Archetype archetype,
+        ulong addedComponent)
     {
         if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
             return;
 
+        var componentWildcard = IdConverter.Compose(
+            IdConverter.GetFirst(addedComponent),
+            wildCard32,
+            true);
+        var wildcardComponent = IdConverter.Compose(
+            wildCard32,
+            IdConverter.GetSecond(addedComponent),
+            true);
+
         foreach (var onComponentSystem in onComponentSystems!)
         {
+            var allComponents = onComponentSystem.allComponentsHashset;
+            var anyComponents = onComponentSystem.anyComponents;
+            bool allComponentsContains =
+                allComponents.Contains(addedComponent) ||
+                allComponents.Contains(componentWildcard) ||
+                allComponents.Contains(wildcardComponent);
+
+            if (allComponentsContains && anyComponents.Count == 0)
+            {
+                onComponentSystem.OnComponentAdd(entity);
+                continue;
+            }
+            else if (anyComponents.Count == 0)
+            {
+                continue;
+            }
+
+            bool anyComponentsContains =
+               anyComponents.Contains(addedComponent) ||
+               anyComponents.Contains(componentWildcard) ||
+               anyComponents.Contains(wildcardComponent);
+
+            if (!allComponentsContains || !anyComponentsContains)
+                continue;
+
             onComponentSystem.OnComponentAdd(entity);
         }
     }
 
-    private void TryCallOnComponentRemoveSystems(Entity entity, Archetype archetype)
+    private void TryCallOnComponentRemoveSystems(
+        Entity entity,
+        Archetype archetype,
+        ulong removedComponent)
     {
         if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
             return;
 
+        var componentWildcard = IdConverter.Compose(
+           IdConverter.GetFirst(removedComponent),
+           wildCard32,
+           true);
+        var wildcardComponent = IdConverter.Compose(
+            wildCard32,
+            IdConverter.GetSecond(removedComponent),
+            true);
+
         foreach (var onComponentSystem in onComponentSystems!)
         {
+            var allComponents = onComponentSystem.allComponentsHashset;
+            var anyComponents = onComponentSystem.anyComponents;
+            bool allComponentsContains =
+                allComponents.Contains(removedComponent) ||
+                allComponents.Contains(componentWildcard) ||
+                allComponents.Contains(wildcardComponent);
+
+            if (allComponentsContains && anyComponents.Count == 0)
+            {
+                onComponentSystem.OnComponentRemove(entity);
+                continue;
+            }
+            else if (anyComponents.Count == 0)
+            {
+                continue;
+            }
+
+            bool anyComponentsContains =
+               anyComponents.Contains(removedComponent) ||
+               anyComponents.Contains(componentWildcard) ||
+               anyComponents.Contains(wildcardComponent);
+
+            if (!allComponentsContains || !anyComponentsContains)
+                continue;
+
             onComponentSystem.OnComponentRemove(entity);
         }
     }

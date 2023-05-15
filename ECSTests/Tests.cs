@@ -35,6 +35,8 @@ struct TagEvent : IEvent { }
 
 struct Likes { }
 
+struct MyRelation { }
+
 struct Size : IAutoReset<Size>
 {
     public float amount;
@@ -60,7 +62,6 @@ public class TestSystem : IInitSystem, IUpdateSystem
         value = 1;
     }
 }
-struct MyRelation { }
 
 public class OnComponentSystemTest : OnComponentActionSystem
 {
@@ -811,18 +812,21 @@ public class UnitTests
     [TestMethod]
     public void OnComponentSystemTest()
     {
-        int expected = 2;
+        int expected = 3;
 
         _testActionSystems.Update();
 
         var entity = _world.AddEntity().Add<Position>().Add<MyRelation, Apples>();
         var entity1 = _world.AddEntity().Add<Position>();
+        var entity2 = _world.AddEntity().Add<Likes, Apples>().Add<Position>().Add<MyRelation, Oranges>();
         entity.Add<Velocity>().Remove<Velocity>();
+        entity2.Remove<MyRelation, Oranges>();
 
         var actual = _testActionSystems.GetSystem<OnComponentSystemTest>().value;
 
         entity.Remove();
         entity1.Remove();
+        entity2.Remove();
 
         Assert.AreEqual(expected, actual);
     }
