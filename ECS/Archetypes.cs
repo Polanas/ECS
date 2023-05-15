@@ -1659,7 +1659,7 @@ public sealed class Archetypes
             matchingArchetypes.Add(matchingArchetype);
     }
 
-    private bool ComponentsCompatibleOnlyWith(SortedSet<ulong> allComponents,
+    private bool ComponentsCompatibleWith(SortedSet<ulong> allComponents,
                                      SortedSet<ulong> noneComponents,
                                      SortedSet<ulong> anyComponents,
                                      Archetype archetype)
@@ -1813,7 +1813,7 @@ public sealed class Archetypes
 
         foreach (var onComponentSystem in _onComponentSystems)
         {
-            if (!ComponentsCompatibleOnlyWith(onComponentSystem.allComponents,
+            if (!ComponentsCompatibleWith(onComponentSystem.allComponents,
                                          onComponentSystem.noneComponents,
                                          onComponentSystem.allComponents,
                                          archetype))
