@@ -775,4 +775,6 @@ public sealed class ECSWorld
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong IndexOf<T>() where T : struct => _archetypes.GetComponentIndex<T>();
+
+    public Type TypeOf(ulong component) => TypeData.TypesByIndices[component];
 }
