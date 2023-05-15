@@ -114,8 +114,14 @@ public static class EntityExtensions
         return entity;
     }
 
-    public static bool IsAlive(this Entity entity) =>
-        entity.world.IsAlive(entity);
+    public static bool IsAlive(this Entity entity)
+    {
+        var world = entity.world;
+        if (world == null)
+            return false;
+
+        return world.IsAlive(entity);
+    }
 
     public static Entity Add(this Entity entity, Entity relation, Entity target)
     {
