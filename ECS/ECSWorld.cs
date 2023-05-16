@@ -107,6 +107,7 @@ public sealed class ECSWorld
     }
 
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity CopyEntity(Entity entityToCopy)
     {
         var copyEntity = AddEntity();
@@ -114,21 +115,26 @@ public sealed class ECSWorld
         return copyEntity;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Filter GetChildren(Entity entity) =>
         _archetypes.GetChildren(entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsEntityChildOf(Entity entity, Entity potentialParent) =>
         HasRelationship<ChildOf>(entity, potentialParent);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddChildOf(Entity entity, Entity parent) =>
         AddRelationship<ChildOf>(entity, parent);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveChildOf(Entity entity)
     {
         var relationship = entity.Find<ChildOf, Wildcard>();
         RemoveRelationship<ChildOf>(entity, relationship.GetTarget());
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetPrefabValue<T>(Entity prefabEntity, T value, ModifyPrefabValue<T> modifyPrefabValuePrefab = null!) where T : struct
     {
 #if DEBUG
@@ -139,6 +145,7 @@ public sealed class ECSWorld
         _archetypes.SetPrefabValue(prefabEntity, value, modifyPrefabValuePrefab);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetPrefabValue<T1, T2>(Entity prefabEntity, T1 value, ModifyPrefabValue<T1> modifyPrefabValuePrefab = null!) where T1 : struct where T2 : struct
     {
 #if DEBUG
@@ -149,6 +156,7 @@ public sealed class ECSWorld
         _archetypes.SetPrefabValue(prefabEntity, value, modifyPrefabValuePrefab);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetPrefabValue<T1, T2>(Entity prefabEntity, T2 value, ModifyPrefabValue<T2> modifyPrefabValuePrefab = null!) where T1 : struct where T2 : struct
     {
 #if DEBUG
@@ -159,6 +167,7 @@ public sealed class ECSWorld
         _archetypes.SetPrefabValue(prefabEntity, value, modifyPrefabValuePrefab);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetPrefabValue<T>(Entity target, Entity prefabEntity, T value, ModifyPrefabValue<T> modifyPrefabValuePrefab = null!) where T : struct
     {
 #if DEBUG
@@ -169,12 +178,14 @@ public sealed class ECSWorld
         _archetypes.SetPrefabValue(target, prefabEntity, value, modifyPrefabValuePrefab);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong GetEntityFromIndex(uint index)
     {
         ref var record = ref _archetypes.GetEntityRecord(index);
         return record.entity;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong GetRelationshipRelation(ulong relationship)
     {
         var first = IdConverter.GetFirst(relationship);
@@ -184,6 +195,7 @@ public sealed class ECSWorld
         return GetEntityFromIndex(first);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong GetRelationshipTarget(ulong relationship)
     {
         var second = IdConverter.GetSecond(relationship);
@@ -193,15 +205,19 @@ public sealed class ECSWorld
         return GetEntityFromIndex(second);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Relationship GetRelationship<T1, T2>() where T1 : struct where T2 : struct =>
         new(this, _archetypes.GetRelationship(IndexOf<T1>(), IndexOf<T2>()));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Relationship GetRelationship<T>(Entity target) where T : struct =>
         new(this, _archetypes.GetRelationship(IndexOf<T>(), target));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Relationship GetRelationship(Entity relation, Entity target) =>
         new(this, _archetypes.GetRelationship(relation, target));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Relationship FindRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relationshipToFind = GetRelationship<T>(target);
@@ -250,6 +266,7 @@ public sealed class ECSWorld
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Relationship FindRelationship<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relationshipToFind = GetRelationship<T1, T2>();
@@ -298,27 +315,35 @@ public sealed class ECSWorld
         return 0;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipHasTarget<T>(ulong relationship) where T : struct =>
         IdConverter.GetFirst(relationship) == IdConverter.GetFirst(IndexOf<T>());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipHasTarget(ulong relationship, ulong target) =>
         IdConverter.GetFirst(relationship) == IdConverter.GetFirst(target);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipHasRelation<T>(ulong relationship) where T : struct =>
         IdConverter.GetSecond(relationship) == IdConverter.GetFirst(IndexOf<T>());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipHasRelation(ulong relationship, ulong relation) =>
         IdConverter.GetSecond(relationship) == IdConverter.GetFirst(relation);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipIs<T1, T2>(ulong relationship) where T1 : struct where T2 : struct =>
         relationship == IdConverter.Compose(IdConverter.GetFirst(IndexOf<T1>()), IdConverter.GetFirst(IndexOf<T2>()), true);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipIs<T>(ulong relationship, ulong target) where T : struct =>
         relationship == IdConverter.Compose(IdConverter.GetFirst(IndexOf<T>()), IdConverter.GetFirst(target), true);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipIs(ulong relationship, ulong relation, ulong target) =>
       relationship == IdConverter.Compose(IdConverter.GetFirst(target), IdConverter.GetFirst(target), true);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity AddEntity(string? name = default)
     {
         var entity = _archetypes.AddEntity();
@@ -328,6 +353,7 @@ public sealed class ECSWorld
         return entity;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity AddPrefab(string? name = default)
     {
         var entity = AddEntity(name);
@@ -336,37 +362,47 @@ public sealed class ECSWorld
         return entity;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddInstanceOf(Entity entity, Entity instace) =>
         _archetypes.AddInstanceOf(entity, instace);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveEntity(Entity entity) => _archetypes.RemoveEntity(entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsAlive(Entity entity) => _archetypes.IsEntityAlive(entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddComponent<T>(Entity entity, T value) where T : struct =>
          _archetypes.AddComponent(IndexOf<T>(), entity, value);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T> GetComponent<T>(Entity entity) where T : struct
     {
         ref T component = ref _archetypes.GetComponent<T>(IndexOf<T>(), entity);
         return new EntityWithComponent<T>(entity, Archetypes, ref component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasComponent<T>(Entity entity) where T : struct =>
         _archetypes.HasComponent(IndexOf<T>(), entity);
 
-    public bool HasTag(Entity entity, Entity tag) =>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool HasComponent(Entity entity, Entity tag) =>
         _archetypes.HasComponent(tag, entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RemoveComponent<T>(Entity entity) where T : struct =>
         _archetypes.RemoveComponent<T>(IndexOf<T>(), entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasName(Entity entity)
     {
         var parent = IdConverter.GetSecond(FindRelationship<ChildOf, Wildcard>(entity));
         return _archetypes.EntityHasName(entity, parent);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Name(Entity entity, string name)
     {
         var parent = IdConverter.GetSecond(FindRelationship<ChildOf, Wildcard>(entity));
@@ -380,6 +416,7 @@ public sealed class ECSWorld
         _archetypes.AddEntityName(entity, parent, name);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveName(Entity entity)
     {
         if (!entity.Has<ChildOf, Wildcard>())
@@ -401,8 +438,10 @@ public sealed class ECSWorld
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity GetEntity(string name, Entity parent = default) => new(_archetypes.GetEntityByName(name, parent), this);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string GetName(Entity entity)
     {
         if (!entity.Has<ChildOf, Wildcard>())
@@ -422,9 +461,11 @@ public sealed class ECSWorld
         return string.Empty;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string GetName(Entity entity, Entity parent) =>
         _archetypes.GetNameByEntity(entity, parent);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSingletonEvent<T>(T value = default) where T : struct, ISingletonEvent
     {
         var index = IndexOf<T>();
@@ -438,12 +479,14 @@ public sealed class ECSWorld
         _archetypes.AddComponent(index, index, value, Archetypes.singletonComponentCapacity);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool WasSingletonCreated<T>() where T : struct, ISingletonEvent
     {
         var index = IndexOf<T>();
         return HasComponent<T>(index);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ref T GetSingletonEvent<T>() where T : struct, ISingletonEvent
     {
         var index = IndexOf<T>();
@@ -454,6 +497,7 @@ public sealed class ECSWorld
         return ref _archetypes.GetComponent<T>(index, index);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveSingletonEvent<T>() where T : struct, ISingletonEvent
     {
         var index = IndexOf<T>();
@@ -468,6 +512,7 @@ public sealed class ECSWorld
         _archetypes.RemoveComponent<T>(index, index);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddEvent<T>(T value = default) where T : struct, IEvent
     {
         var index = IndexOf<T>();
@@ -481,9 +526,7 @@ public sealed class ECSWorld
         _archetypes.AddEvent(index, AddEntity(), value);
     }
 
-    /// <summary>
-    /// Covers Component-Entity and TagComponent-Entity relations
-    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddRelationship<T>(Entity entity, Entity target, T value = default) where T : struct
     {
         var relation = IndexOf<T>();
@@ -502,6 +545,7 @@ public sealed class ECSWorld
         _archetypes.AddDataRelationship<T>(entity, relation, target) = value;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T> GetRelationship<T>(Entity entity, ulong relationship) where T : struct
     {
         var relation = IndexOf<T>();
@@ -514,6 +558,7 @@ public sealed class ECSWorld
         return new EntityWithComponent<T>(entity, _archetypes, ref component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T> GetRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relation = IndexOf<T>();
@@ -525,12 +570,14 @@ public sealed class ECSWorld
         return new EntityWithComponent<T>(entity, _archetypes, ref component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relation = IndexOf<T>();
         return _archetypes.HasRelationship(entity, relation, target);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relation = IndexOf<T>();
@@ -544,6 +591,7 @@ public sealed class ECSWorld
         _archetypes.RemoveDataRelationship(entity, relation, target);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddRelationship<T1, T2>(Entity entity, T1 value) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -563,6 +611,7 @@ public sealed class ECSWorld
         _archetypes.AddDataRelationship<T1>(entity, relation, target) = value;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddRelationship<T1, T2>(Entity entity, T2 value) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -582,6 +631,7 @@ public sealed class ECSWorld
         _archetypes.AddDataRelationship<T2>(entity, relation, target) = value;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T1> GetRelationship1<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -594,6 +644,7 @@ public sealed class ECSWorld
         return new EntityWithComponent<T1>(entity, _archetypes, ref component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T2> GetRelationship2<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -606,6 +657,7 @@ public sealed class ECSWorld
         return new EntityWithComponent<T2>(entity, _archetypes, ref component);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasRelationship<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -613,6 +665,7 @@ public sealed class ECSWorld
         return _archetypes.HasRelationship(entity, relation, target);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveRelationship<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -627,19 +680,19 @@ public sealed class ECSWorld
         _archetypes.RemoveDataRelationship(entity, relation, target);
     }
 
-    /// <summary>
-    /// Covers Entity-Entity
-    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddRelationship(Entity entity, Entity relation, Entity target)
     {
         _archetypes.AddRelationship(entity, relation, target);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasRelationship(Entity entity, Entity relation, Entity target)
     {
         return _archetypes.HasRelationship(entity, relation, target);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveRelationship(Entity entity, Entity relation, Entity target)
     {
         var relationId = IdConverter.GetFirst(relation);
@@ -649,37 +702,45 @@ public sealed class ECSWorld
         _archetypes.RemoveComponent(relationComponent, entity, out _, out _, true);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity GetRelationEntity(ulong relationship) =>
          new(IdConverter.Compose(IdConverter.GetFirst(relationship), 0, false), this);
 
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity GetTargetEntity(ulong relationship) =>
          new(IdConverter.Compose(IdConverter.GetSecond(relationship), 0, false), this);
 
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public RelationshipEnumeratorGetter GetRelationships(Entity entity) =>
          new(GetArchetype(entity));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ComponentEnumeratorGetter GetComponents(Entity entity) =>
         new(GetArchetype(entity));
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddTag(Entity target, Entity tag) =>
         _archetypes.AddEntityTag(target, tag);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddTag<T>(Entity entity) where T : struct
     {
         var tag = IndexOf<T>();
         _archetypes.AddEntityTag(entity, tag);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Archetype GetArchetype(Entity entity) => _archetypes.GetArchetype(entity);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EnumeratorSingleGetter<T> GetEvents<T>() where T : struct, IEvent =>
         _archetypes.GetEvents<T>();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveEvents<T>() where T : struct, IEvent =>
         _archetypes.RemoveEvents<T>(IndexOf<T>());
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Destroy()
     {
         foreach (var systems in _ecsSystems)

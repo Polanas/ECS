@@ -846,5 +846,7 @@ public class UnitTests
         int actual = entity.Get<Position>().Value.x;
 
         Assert.AreEqual(expected, actual);
+
+        entity.Remove();
     }
 }
