@@ -45,20 +45,20 @@ internal static class ArchetypesHelperExtensions
         var theirs = asSorted.GetEnumerator();
         bool mineEnded = !mine.MoveNext();
         bool theirsEnded = !theirs.MoveNext();
-        bool mineIsRelation;
-        bool theirsIsRelation;
+        bool mineHasNoData;
+        bool theirsHasNoData;
 
         while (!mineEnded && !theirsEnded)
         {
             var mineCurrent = mine.Current;
             var theirsCurrent = theirs.Current;
 
-            if (mineIsRelation = IdConverter.IsRelationship(mineCurrent))
+            if (mineHasNoData = !archetypes.IsDataComponent(mineCurrent))
                 mine.MoveNext();
-            if (theirsIsRelation = IdConverter.IsRelationship(theirsCurrent))
+            if (theirsHasNoData = !archetypes.IsDataComponent(theirsCurrent))
                 theirs.MoveNext();
 
-            if (mineIsRelation || theirsIsRelation)
+            if (mineHasNoData || theirsHasNoData)
                 continue;
 
             if (mineCurrent != theirsCurrent)

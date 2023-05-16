@@ -87,7 +87,6 @@ public sealed class ECSWorld
     internal static ECSWorld? Instance { get; private set; }
 
     private readonly Archetypes _archetypes;
-    private readonly IntPtr[] _singeItemArray = new IntPtr[1];
     private readonly List<ECSSystems> _ecsSystems;
 
     public ECSWorld()
@@ -347,8 +346,11 @@ public sealed class ECSWorld
     public void AddComponent<T>(Entity entity, T value) where T : struct =>
          _archetypes.AddComponent(IndexOf<T>(), entity, value);
 
-    public ref T GetComponent<T>(Entity entity) where T : struct =>
-        ref _archetypes.GetComponent<T>(IndexOf<T>(), entity);
+    public EntityWithComponent<T> GetComponent<T>(Entity entity) where T : struct
+    {
+        ref T component = ref _archetypes.GetComponent<T>(IndexOf<T>(), entity);
+        return new EntityWithComponent<T>(entity, Archetypes, ref component);
+    }
 
     public bool HasComponent<T>(Entity entity) where T : struct =>
         _archetypes.HasComponent(IndexOf<T>(), entity);
@@ -495,12 +497,12 @@ public sealed class ECSWorld
 
         var oldArchetype = _archetypes.GetArchetype(entity);
         if (oldArchetype.GetTableEdge(relationship).Add == null)
-            GetComponent<Component>(relation).size = Unsafe.SizeOf<T>();
+            GetComponent<Component>(relation).Value.size = Unsafe.SizeOf<T>();
 
         _archetypes.AddDataRelationship<T>(entity, relation, target) = value;
     }
 
-    public ref T GetRelationship<T>(Entity entity, ulong relationship) where T : struct
+    public EntityWithComponent<T> GetRelationship<T>(Entity entity, ulong relationship) where T : struct
     {
         var relation = IndexOf<T>();
         var target = new Entity(IdConverter.Compose(IdConverter.GetSecond(relationship), 0, false), this);
@@ -508,20 +510,19 @@ public sealed class ECSWorld
         ref var record = ref _archetypes.GetEntityRecord(entity);
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T>(_archetypes.GetRelationship(relation, target));
-        return ref storage[record.tableRow];
+        ref var component = ref storage[record.tableRow];
+        return new EntityWithComponent<T>(entity, _archetypes, ref component);
     }
 
-    public ref T GetRelationship<T>(Entity entity, Entity target) where T : struct
+    public EntityWithComponent<T> GetRelationship<T>(Entity entity, Entity target) where T : struct
     {
-        if (Unsafe.SizeOf<T>() == 1)
-            return ref Unsafe.As<T[]>(_singeItemArray)[0];
-
         var relation = IndexOf<T>();
 
         ref var record = ref _archetypes.GetEntityRecord(entity);
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T>(_archetypes.GetRelationship(relation, target));
-        return ref storage[record.tableRow];
+        ref var component = ref storage[record.tableRow];
+        return new EntityWithComponent<T>(entity, _archetypes, ref component);
     }
 
     public bool HasRelationship<T>(Entity entity, Entity target) where T : struct
@@ -543,9 +544,6 @@ public sealed class ECSWorld
         _archetypes.RemoveDataRelationship(entity, relation, target);
     }
 
-    /// <summary>
-    /// Covers TagComponent-TagComponent, Component-TagComponent and TagComponent-Component
-    /// </summary>
     public void AddRelationship<T1, T2>(Entity entity, T1 value) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
@@ -560,7 +558,7 @@ public sealed class ECSWorld
 
         var oldArchetype = _archetypes.GetArchetype(entity);
         if (oldArchetype.GetTableEdge(relationship).Add == null)
-            GetComponent<Component>(relation).size = Unsafe.SizeOf<T1>();
+            GetComponent<Component>(relation).Value.size = Unsafe.SizeOf<T1>();
 
         _archetypes.AddDataRelationship<T1>(entity, relation, target) = value;
     }
@@ -579,37 +577,33 @@ public sealed class ECSWorld
 
         var oldArchetype = _archetypes.GetArchetype(entity);
         if (oldArchetype.GetTableEdge(relationship).Add == null)
-            GetComponent<Component>(target).size = Unsafe.SizeOf<T2>();
+            GetComponent<Component>(target).Value.size = Unsafe.SizeOf<T2>();
 
         _archetypes.AddDataRelationship<T2>(entity, relation, target) = value;
     }
 
-    public ref T1 GetRelationship1<T1, T2>(Entity entity) where T1 : struct where T2 : struct
+    public EntityWithComponent<T1> GetRelationship1<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
         var target = IndexOf<T2>();
-
-        if (Unsafe.SizeOf<T1>() == 1)
-            return ref Unsafe.As<T1[]>(_singeItemArray)[0];
 
         ref var record = ref _archetypes.GetEntityRecord(entity);
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T1>(_archetypes.GetRelationship(relation, target));
-        return ref storage[record.tableRow];
+        ref var component = ref storage[record.tableRow];
+        return new EntityWithComponent<T1>(entity, _archetypes, ref component);
     }
 
-    public ref T2 GetRelationship2<T1, T2>(Entity entity) where T1 : struct where T2 : struct
+    public EntityWithComponent<T2> GetRelationship2<T1, T2>(Entity entity) where T1 : struct where T2 : struct
     {
         var relation = IndexOf<T1>();
         var target = IndexOf<T2>();
 
-        if (Unsafe.SizeOf<T2>() == 1)
-            return ref Unsafe.As<T2[]>(_singeItemArray)[0];
-
         ref var record = ref _archetypes.GetEntityRecord(entity);
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T2>(_archetypes.GetRelationship(relation, target));
-        return ref storage[record.tableRow];
+        ref var component = ref storage[record.tableRow];
+        return new EntityWithComponent<T2>(entity, _archetypes, ref component);
     }
 
     public bool HasRelationship<T1, T2>(Entity entity) where T1 : struct where T2 : struct

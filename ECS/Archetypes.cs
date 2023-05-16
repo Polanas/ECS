@@ -8,10 +8,13 @@ public struct AdditionalEntityData
 {
     private byte _data;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Set(byte type, bool value) => _data = (byte)(value ? _data | (1 << type) : _data & 1);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Get(byte type) => (_data & (1 << type)) > 0;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear() => _data = 0;
 }
 
@@ -23,20 +26,28 @@ public struct EntityRecord
     public ulong entity;
     public AdditionalEntityData additionalData;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsTag() => additionalData.Get(0);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetIsTag(bool value) => additionalData.Set(0, value);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsRelation() => additionalData.Get(1);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetIsRelation(bool value) => additionalData.Set(1, value);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsTarget() => additionalData.Get(2);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetIsTarget(bool value) => additionalData.Set(2, value);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool HasRelationships() => additionalData.Get(3);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetHasRelationsips(bool value) => additionalData.Set(3, value);
 }
 
@@ -416,8 +427,13 @@ public sealed class Archetypes
 #endif
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Archetype GetArchetype(Entity entity) =>
         ((Archetype?)_archetypes[_entityRecords[IdConverter.GetFirst(entity)].archetypeId].Target)!;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Archetype GetArchetypeFromRecord(ref EntityRecord record) =>
+        ((Archetype?)_archetypes[record.archetypeId].Target)!;
 
     public Entity AddEntity()
     {
@@ -576,21 +592,18 @@ public sealed class Archetypes
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
+#if DEBUG
         if (HasComponent(typeIndex, ref record))
         {
-#if DEBUG
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
             throw new Exception($"Entity {entityName} already has component {componentName}.");
-#else
-            newArchetype = oldArchetype;
-            newTableRow = record.tableRow;
-            return false;
-#endif
         }
+#endif
 
         var oldEdge = oldArchetype.GetTableEdge(typeIndex);
-        newArchetype = ((Archetype?)oldEdge.Add?.Target)!;
+        var newArchetypeRef = oldEdge.Add;
+        newArchetype = ((Archetype?)newArchetypeRef?.Target)!;
 
         bool isNewArchetypeNull = newArchetype == null;
         if (isNewArchetypeNull)
@@ -598,7 +611,7 @@ public sealed class Archetypes
             SortedSet<ulong> newTypes = new(oldArchetype.components) { typeIndex };
 
             newTypes.Remove(entityType);
-            newArchetype = TryGetArchetype(newTypes)!;
+            newArchetypeRef = TryGetArchetype(newTypes)!;
 
             Table newTable = null!;
             if (!reuseTable)
@@ -606,11 +619,15 @@ public sealed class Archetypes
                 newTable = TryGetTable(newTypes)!;
             }
             newTable ??= reuseTable ? oldArchetype.Table : new Table(this, newTypes, finalComponentsCapacity, relationshipsCapacity);
-            var newArchetypeRef = AddArchetype(newTable, newTypes, finalComponentsCapacity != singletonComponentCapacity ? -1 : singletonComponentCapacity);
-            newArchetype ??= ((Archetype?)newArchetypeRef.Target)!;
-            oldEdge.Add = newArchetypeRef;
 
-            var newEdge = newArchetype.GetTableEdge(typeIndex);
+            if (newArchetypeRef?.Target == null)
+            {
+                newArchetypeRef = AddArchetype(newTable, newTypes, finalComponentsCapacity != singletonComponentCapacity ? -1 : singletonComponentCapacity);
+            }
+            newArchetype = ((Archetype?)newArchetypeRef.Target)!;
+
+            oldEdge.Add = newArchetypeRef;
+            var newEdge = newArchetype!.GetTableEdge(typeIndex);
             newEdge.Remove = oldArchetypeRef;
         }
 
@@ -808,28 +825,25 @@ public sealed class Archetypes
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
+#if DEBUG
         if (!HasComponent(typeIndex, ref record))
         {
-#if DEBUG
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
             throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
-#else
-            newArchetype = oldArchetype;
-            isNewArchetypeNull = false;
-            return false;
+            }
 #endif
-        }
 
         var oldEdge = oldArchetype.GetTableEdge(typeIndex);
-        newArchetype = ((Archetype?)oldEdge.Remove?.Target)!;
+        var newArchetypeRef = oldEdge.Remove;
+        newArchetype = ((Archetype?)newArchetypeRef?.Target)!;
 
         isNewArchetypeNull = newArchetype == null;
         if (isNewArchetypeNull && oldArchetype.components.Count > 1)
         {
             SortedSet<ulong> newTypes = new(oldArchetype.components);
             newTypes.Remove(typeIndex);
-            newArchetype = TryGetArchetype(newTypes)!;
+            newArchetypeRef = TryGetArchetype(newTypes)!;
 
             Table newTable = null!;
             if (!reuseTable)
@@ -837,10 +851,14 @@ public sealed class Archetypes
                 newTable = TryGetTable(newTypes)!;
             }
             newTable ??= reuseTable ? oldArchetype.Table : new Table(this, newTypes, componentsCapacity, relationshipsCapacity);
-            var newArchetypeRef = AddArchetype(newTable, newTypes);
-            newArchetype ??= ((Archetype?)newArchetypeRef.Target)!;
-            oldEdge.Remove = newArchetypeRef;
 
+            if (newArchetypeRef?.Target == null)
+            {
+                newArchetypeRef = AddArchetype(newTable, newTypes);
+            }
+            newArchetype ??= ((Archetype?)newArchetypeRef.Target)!;
+
+            oldEdge.Remove = newArchetypeRef;
             var newEdge = newArchetype.GetTableEdge(typeIndex);
             newEdge.Add = oldArchetypeRef;
         }
@@ -1424,7 +1442,7 @@ public sealed class Archetypes
 
     }
 
-    private Archetype? TryGetArchetype(SortedSet<ulong> types)
+    private WeakReference? TryGetArchetype(SortedSet<ulong> types)
     {
         _archetypesByHashes.TryGetValue(types.GetCustomtHashCode(), out var archetypesList);
 
@@ -1436,7 +1454,7 @@ public sealed class Archetypes
             var archetype = ((Archetype?)archetypeRef.Target)!;
 
             if (types.SetEquals(archetype.components))
-                return archetype;
+                return archetypeRef;
         }
 
         return null;

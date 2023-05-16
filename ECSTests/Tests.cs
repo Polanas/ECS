@@ -18,12 +18,9 @@ struct Eats { public int Amount; }
 
 struct People { }
 
-struct SingletonEvent : ISingletonEvent { public int value; }
+struct Position { public int x, y; }
 
-struct Position
-{
-    public int x, y;
-}
+struct SingletonEvent : ISingletonEvent { public int value; }
 
 struct Velocity { public int x, y; }
 
@@ -246,7 +243,7 @@ public class UnitTests
         var position = entity.Get<Position>();
         var velocity = entity.Get<Velocity>();
 
-        var actual = position.x + position.y + velocity.x + velocity.y;
+        var actual = position.Value.x + position.Value.y + velocity.Value.x + velocity.Value.y;
 
         entity.Remove();
 
@@ -261,12 +258,12 @@ public class UnitTests
 
         entity.Add(new Position { x = 2, y = 2 });
 
-        ref var position = ref entity.Get<Position>();
-        position.x++;
-        position.y++;
+        var position = entity.Get<Position>();
+        position.Value.x++;
+        position.Value.y++;
 
         var positionAfterChange = entity.Get<Position>();
-        var actual = positionAfterChange.x + positionAfterChange.y;
+        var actual = positionAfterChange.Value.x + positionAfterChange.Value.y;
 
         entity.Remove();
 
@@ -358,7 +355,7 @@ public class UnitTests
         var positionBegin = entity.Get2<Begin, Position>();
         var positionEnd = entity.Get2<End, Position>();
 
-        var actual = positionBegin.x + positionBegin.y + positionEnd.x + positionEnd.y;
+        var actual = positionBegin.Value.x + positionBegin.Value.y + positionEnd.Value.x + positionEnd.Value.y;
 
         entity.Remove();
 
@@ -377,7 +374,7 @@ public class UnitTests
         var owesAples = entity.Get1<Owes, Apples>();
         var owesOranges = entity.Get1<Owes, Oranges>();
 
-        var actual = owesAples.Amount + owesOranges.Amount;
+        var actual = owesAples.Value.Amount + owesOranges.Value.Amount;
 
         entity.Remove();
 
@@ -392,11 +389,11 @@ public class UnitTests
 
         entity.Add<Owes, Apples>(new Owes { Amount = 5 });
 
-        ref var owesApples = ref entity.Get1<Owes, Apples>();
-        owesApples.Amount++;
+        var owesApples = entity.Get1<Owes, Apples>();
+        owesApples.Value.Amount++;
 
         var owesApplesAfterChange = entity.Get1<Owes, Apples>();
-        var actual = owesApplesAfterChange.Amount;
+        var actual = owesApplesAfterChange.Value.Amount;
 
         entity.Remove();
 
@@ -411,12 +408,12 @@ public class UnitTests
 
         entity.Add<Begin, Position>(new Position { x = 2, y = 3 });
 
-        ref var beignPosition = ref entity.Get2<Begin, Position>();
-        beignPosition.x++;
-        beignPosition.y++;
+        var beignPosition = entity.Get2<Begin, Position>();
+        beignPosition.Value.x++;
+        beignPosition.Value.y++;
 
         var begiPositionAfterChange = entity.Get2<Begin, Position>();
-        var actual = begiPositionAfterChange.x + begiPositionAfterChange.y;
+        var actual = begiPositionAfterChange.Value.x + begiPositionAfterChange.Value.y;
 
         entity.Remove();
 
@@ -526,7 +523,7 @@ public class UnitTests
         var positionOne = instanceOne.Get<Position>();
         var positionTwo = instanceTwo.Get<Position>();
 
-        var actual = positionOne.x + positionOne.y + positionTwo.x + positionTwo.y;
+        var actual = positionOne.Value.x + positionOne.Value.y + positionTwo.Value.x + positionTwo.Value.y;
 
         instanceOne.Remove();
         instanceTwo.Remove();
@@ -674,7 +671,7 @@ public class UnitTests
 
         var entity = _world.AddEntity().Add<Size>();
 
-        actual = entity.Get<Size>().amount;
+        actual = entity.Get<Size>().Value.amount;
 
         Assert.AreEqual(expected, actual);
     }
@@ -758,7 +755,7 @@ public class UnitTests
         var pos1 = entity1.Get<Position>();
         var pos2 = entity2.Get<Position>();
 
-        var actual = pos1.x + pos1.y + pos2.x + pos2.y;
+        var actual = pos1.Value.x + pos1.Value.y + pos2.Value.x + pos2.Value.y;
 
         entity1.Remove();
         entity2.Remove();
@@ -801,7 +798,7 @@ public class UnitTests
 
         var pos = entity.Get<Position>();
 
-        float actual = pos.x + pos.y;
+        float actual = pos.Value.x + pos.Value.y;
 
         prefab.Remove();
         entity.Remove();
@@ -827,6 +824,26 @@ public class UnitTests
         entity.Remove();
         entity1.Remove();
         entity2.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+
+    public void NewComponentReferenceTest()
+    {
+        int expected = 2;
+
+        var entity = _world.AddEntity().Add<Position>();
+        var position = entity.Get<Position>();
+        position.Value.x += 1;
+
+        entity.Add<Tag>();
+        position.Value.x += 1;
+
+        entity.Add<Velocity>();
+
+        int actual = entity.Get<Position>().Value.x;
 
         Assert.AreEqual(expected, actual);
     }

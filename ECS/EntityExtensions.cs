@@ -68,31 +68,30 @@ public static class EntityExtensions
 
     public static Entity Get<T>(this Entity entity, out T component) where T : struct
     {
-        component = entity.world.GetComponent<T>(entity);
+        component = entity.world.GetComponent<T>(entity).Value;
         return entity;
     }
 
     public static Entity Get<T>(this Entity entity, Entity target, out T component) where T : struct
     {
-        component = entity.world.GetRelationship<T>(entity, target);
+        component = entity.world.GetRelationship<T>(entity, target).Value;
         return entity;
     }
 
-    public static ref T Get<T>(this Entity entity) where T : struct =>
-        ref entity.world.GetComponent<T>(entity);
+    public static EntityWithComponent<T> Get<T>(this Entity entity) where T : struct =>
+        entity.world.GetComponent<T>(entity);
 
-    public static ref T Get<T>(this Entity entity, Entity target) where T : struct =>
-       ref entity.world.GetRelationship<T>(entity, target);
+    public static EntityWithComponent<T> Get<T>(this Entity entity, Entity target) where T : struct => entity.world.GetRelationship<T>(entity, target);
 
     public static Entity Set<T>(this Entity entity, T value) where T : struct
     {
-        entity.world.GetComponent<T>(entity) = value;
+        entity.world.GetComponent<T>(entity).Value = value;
         return entity;
     }
 
     public static Entity Set<T>(this Entity entity, Entity target, T value) where T : struct
     {
-        entity.world.GetRelationship<T>(entity, target) = value;
+        entity.world.GetRelationship<T>(entity, target).Value = value;
         return entity;
     }
 
@@ -153,6 +152,18 @@ public static class EntityExtensions
         return entity;
     }
 
+    public static Entity Add1<T1, T2>(this Entity entity, T1 value = default) where T1 : struct where T2 : struct
+    {
+        entity.world.AddRelationship<T1, T2>(entity, value);
+        return entity;
+    }
+
+    public static Entity Add2<T1, T2>(this Entity entity, T2 value = default) where T1 : struct where T2 : struct
+    {
+        entity.world.AddRelationship<T1, T2>(entity, value);
+        return entity;
+    }
+
     public static Relationship Find<T>(this Entity entity, Entity target) where T : struct =>
         entity.world.FindRelationship<T>(entity, target);
 
@@ -161,33 +172,31 @@ public static class EntityExtensions
 
     public static Entity Set1<T1, T2>(this Entity entity, T1 value) where T1 : struct where T2 : struct
     {
-        entity.world.GetRelationship1<T1, T2>(entity) = value;
+        entity.world.GetRelationship1<T1, T2>(entity).Value = value;
         return entity;
     }
 
     public static Entity Set2<T1, T2>(this Entity entity, T2 value) where T1 : struct where T2 : struct
     {
-        entity.world.GetRelationship2<T1, T2>(entity) = value;
+        entity.world.GetRelationship2<T1, T2>(entity).Value = value;
         return entity;
     }
 
     public static Entity Get1<T1, T2>(this Entity entity, out T1 component) where T1 : struct where T2 : struct
     {
-        component = entity.world.GetRelationship1<T1, T2>(entity);
+        component = entity.world.GetRelationship1<T1, T2>(entity).Value;
         return entity;
     }
 
     public static Entity Get2<T1, T2>(this Entity entity, out T2 component) where T1 : struct where T2 : struct
     {
-        component = entity.world.GetRelationship2<T1, T2>(entity);
+        component = entity.world.GetRelationship2<T1, T2>(entity).Value;
         return entity;
     }
 
-    public static ref T1 Get1<T1, T2>(this Entity entity) where T1 : struct where T2 : struct =>
-        ref entity.world.GetRelationship1<T1, T2>(entity);
+    public static EntityWithComponent<T1> Get1<T1, T2>(this Entity entity) where T1 : struct where T2 : struct => entity.world.GetRelationship1<T1, T2>(entity);
 
-    public static ref T2 Get2<T1, T2>(this Entity entity) where T1 : struct where T2 : struct =>
-       ref entity.world.GetRelationship2<T1, T2>(entity);
+    public static EntityWithComponent<T2> Get2<T1, T2>(this Entity entity) where T1 : struct where T2 : struct => entity.world.GetRelationship2<T1, T2>(entity);
 
     public static bool Has<T1, T2>(this Entity entity) where T1 : struct where T2 : struct =>
         entity.world.HasRelationship<T1, T2>(entity);

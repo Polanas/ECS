@@ -1,7 +1,5 @@
 ﻿namespace ECS;
 
-
-
 static class Program
 {
 
