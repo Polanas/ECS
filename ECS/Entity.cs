@@ -2,51 +2,54 @@
 
 namespace ECS;
 
-public ref struct EntityWithComponent<T> where T : struct
+
+public unsafe struct EntityWithComponent<T> where T : struct
 {
     public ref T Value
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if (_lastArchetypeId != _record.archetypeId)
+            if (_lastArchetypeId != (*(EntityRecord*)_record).archetypeId)
             {
-                var newTable = _archetypes.GetArchetypeFromRecord(ref _record).Table;
+                ref var record = ref Unsafe.AsRef<EntityRecord>(_record);
+                var newTable = _archetypes.GetArchetypeFromRecord(ref record).Table;
                 if (newTable == _lastTable)
-                    return ref _value;
+                    return ref Unsafe.AsRef<T>(_value);
 
                 SetCurrentComponentReference();
             }
 
-            return ref _value;
+            return ref Unsafe.AsRef<T>(_value);
         }
     }
 
     private readonly Entity entity;
-    private ref T _value;
+    private void* _value;
     private readonly Archetypes _archetypes;
-    private ref EntityRecord _record;
+    private void* _record;
     private int _lastArchetypeId;
     private Table _lastTable;
 
     public EntityWithComponent(Entity entity, Archetypes archetypes, ref T value)
     {
-        _record = ref archetypes.GetEntityRecord(entity);
+        ref var record = ref archetypes.GetEntityRecord(entity);
         this.entity = entity;
+        _record = Unsafe.AsPointer(ref record);
         _archetypes = archetypes;
-        _lastArchetypeId = _record.archetypeId;
-        _lastTable = archetypes.GetArchetypeFromRecord(ref _record).Table;
-        _value = ref value;
+        _lastArchetypeId = record.archetypeId;
+        _lastTable = archetypes.GetArchetypeFromRecord(ref record).Table;
+        _value = Unsafe.AsPointer(ref value);
     }
 
     private void SetCurrentComponentReference()
     {
-        _record = ref _archetypes.GetEntityRecord(entity);
-        var archetype = _archetypes.GetArchetypeFromRecord(ref _record);
+        ref var record = ref _archetypes.GetEntityRecord(entity);
+        var archetype = _archetypes.GetArchetypeFromRecord(ref record);
         var storage = archetype.GetStorage<T>();
-        _lastArchetypeId = _record.archetypeId;
+        _lastArchetypeId = record.archetypeId;
         _lastTable = archetype.Table;
-        _value = ref storage[_record.tableRow];
+        _value = Unsafe.AsPointer(ref storage[record.tableRow]);
     }
 }
 
