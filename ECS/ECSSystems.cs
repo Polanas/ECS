@@ -137,6 +137,8 @@ public struct Any<T1, T2> : IInjectedFilterParameter, IAny where T1 : struct whe
 
 public struct FilterInject : IDataInject
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter value = null!;
 
     private FilterBuilder _builder;
@@ -197,6 +199,8 @@ public struct FilterInject : IDataInject
 public struct FilterInject<C> : IDataInject
     where C : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C> value = null!;
 
     private FilterBuilder<C> _builder;
@@ -258,6 +262,8 @@ public struct FilterInject<C1, C2> : IDataInject
     where C1 : struct
     where C2 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2> value = null!;
 
     private FilterBuilder<C1, C2> _builder;
@@ -320,6 +326,8 @@ public struct FilterInject<C1, C2, C3> : IDataInject
     where C2 : struct
     where C3 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3> value = null!;
 
     private FilterBuilder<C1, C2, C3> _builder;
@@ -383,6 +391,8 @@ public struct FilterInject<C1, C2, C3, C4> : IDataInject
     where C3 : struct
     where C4 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3, C4> value = null!;
 
     private FilterBuilder<C1, C2, C3, C4> _builder;
@@ -447,6 +457,8 @@ public struct FilterInject<C1, C2, C3, C4, C5> : IDataInject
     where C4 : struct
     where C5 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3, C4, C5> value = null!;
 
     private FilterBuilder<C1, C2, C3, C4, C5> _builder;
@@ -512,6 +524,8 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6> : IDataInject
     where C5 : struct
     where C6 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3, C4, C5, C6> value = null!;
 
     private FilterBuilder<C1, C2, C3, C4, C5, C6> _builder;
@@ -578,6 +592,8 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7> : IDataInject
     where C6 : struct
     where C7 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3, C4, C5, C6, C7> value = null!;
 
     private FilterBuilder<C1, C2, C3, C4, C5, C6, C7> _builder;
@@ -645,6 +661,8 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7, C8> : IDataInject
     where C7 : struct
     where C8 : struct
 {
+    public int Count => value.Count;
+    public bool HasEntities => value.HasEntities;
     public Filter<C1, C2, C3, C4, C5, C6, C7, C8> value = null!;
 
     private FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8> _builder;
