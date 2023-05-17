@@ -108,7 +108,7 @@ public class Filter
     {
         if (archetypesList.Count == 0 || !TryGetFirstEntity(out var entity))
 #if DEBUG
-            throw new Exception("Cannot get first entity as no entites satisfy the filter.");
+            throw new Exception("Cannot get first _entity as no entites satisfy the filter.");
 #else
             return new(0, archetypes.World);
 #endif

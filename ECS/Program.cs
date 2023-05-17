@@ -45,12 +45,12 @@ static class Program
         foreach (var data in world1.Filter().All<ChildOf>(anotherbob).Build())
         {
             Console.WriteLine("bob has a child!");
-            Console.WriteLine("their name is {0}!", data.entity.GetName());
+            Console.WriteLine("their name is {0}!", data._entity.GetName());
 
-            foreach (var data1 in world1.Filter().All<ChildOf>(data.entity).Build())
+            foreach (var data1 in world1.Filter().All<ChildOf>(data._entity).Build())
             {
                 Console.WriteLine("bobs children have children!");
-                Console.WriteLine("their name is {0}!", data1.entity.GetName());
+                Console.WriteLine("their name is {0}!", data1._entity.GetName());
             }
         }
         */
@@ -134,11 +134,11 @@ static class Program
 
         //foreach (var data in filter)
         //{
-        //    var entity = data.entity;
+        //    var _entity = data._entity;
 
         //    world1.RemoveEntity(isHuman);
-        //    entity.None<Position>();
-        //    entity.None<Velocity>();
+        //    _entity.None<Position>();
+        //    _entity.None<Velocity>();
         //}
 
         //Console.WriteLine(ann.IsAlive());

@@ -15,41 +15,45 @@ public unsafe struct EntityWithComponent<T> where T : struct
                 ref var record = ref Unsafe.AsRef<EntityRecord>(_record);
                 var newTable = _archetypes.GetArchetypeFromRecord(ref record).Table;
                 if (newTable == _lastTable)
-                    return ref Unsafe.AsRef<T>(_value);
+                {
+                    var storage = _lastTable.GetStorage<T>();
+                    return ref storage[record.tableRow];
+                }
 
                 SetCurrentComponentReference();
             }
 
-            return ref Unsafe.AsRef<T>(_value);
+            ref var record1 = ref Unsafe.AsRef<EntityRecord>(_record);
+            var storage1 = _lastTable.GetStorage<T>(_component);
+            return ref storage1[record1.tableRow];
         }
     }
 
-    private readonly Entity entity;
-    private void* _value;
+    private readonly Entity _entity;
+    private readonly ulong _component;
     private readonly Archetypes _archetypes;
     private void* _record;
     private int _lastArchetypeId;
     private Table _lastTable;
 
-    public EntityWithComponent(Entity entity, Archetypes archetypes, ref T value)
+    public EntityWithComponent(Entity entity, ulong component, Archetypes archetypes)
     {
         ref var record = ref archetypes.GetEntityRecord(entity);
-        this.entity = entity;
+        _entity = entity;
+        _component = component;
         _record = Unsafe.AsPointer(ref record);
         _archetypes = archetypes;
         _lastArchetypeId = record.archetypeId;
         _lastTable = archetypes.GetArchetypeFromRecord(ref record).Table;
-        _value = Unsafe.AsPointer(ref value);
     }
 
     private void SetCurrentComponentReference()
     {
-        ref var record = ref _archetypes.GetEntityRecord(entity);
+        ref var record = ref _archetypes.GetEntityRecord(_entity);
         var archetype = _archetypes.GetArchetypeFromRecord(ref record);
-        var storage = archetype.GetStorage<T>();
         _lastArchetypeId = record.archetypeId;
         _lastTable = archetype.Table;
-        _value = Unsafe.AsPointer(ref storage[record.tableRow]);
+        _record = Unsafe.AsPointer(ref record);
     }
 }
 

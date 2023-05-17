@@ -195,7 +195,7 @@ public sealed class Archetypes
     internal Archetype EntityArchetype => ((Archetype?)_archetypes[0]!.Target)!;
 
     public const uint wildCard32 = uint.MaxValue;
-    // since gen/entity is only 31 bits, it needs separate wildCard Instance
+    // since gen/_entity is only 31 bits, it needs separate wildCard Instance
     public const uint wildCard31 = uint.MaxValue >> 1;
     public const ulong componentType = 1;
     public const int singletonComponentCapacity = 1;
@@ -830,7 +830,7 @@ public sealed class Archetypes
         {
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
-            throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
+            throw new Exception($"Cannot add non-existent component {componentName} to _entity {entityName}.");
             }
 #endif
 
@@ -911,7 +911,7 @@ public sealed class Archetypes
 #if DEBUG
                 var entityName = GetEntityNameOrValue(entity);
                 var componentName = GetComponentNameOrValue(typeIndex);
-                throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
+                throw new Exception($"Cannot add non-existent component {componentName} to _entity {entityName}.");
 #else
                     return true;
 #endif
@@ -942,7 +942,7 @@ public sealed class Archetypes
         {
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
-            throw new Exception($"Cannot get non-existent component {componentName} from entity{entityName}");
+            throw new Exception($"Cannot get non-existent component {componentName} from _entity{entityName}");
         }
 #endif
 
@@ -955,7 +955,7 @@ public sealed class Archetypes
         if (!IsEntityAlive(entity))
         {
 #if DEBUG
-            throw new Exception($"Cannot remove a dead entity {entity.value}");
+            throw new Exception($"Cannot remove a dead _entity {entity.value}");
 #else
             return;
 #endif
@@ -976,6 +976,7 @@ public sealed class Archetypes
         archetype.Remove(record.archetypeRow, record.tableRow);
         record.archetypeRow = record.tableRow = record.archetypeId = -1;
         record.entity = 0;
+        record.additionalData.Clear();
 
         _unusedIds.Enqueue(entity);
     }
@@ -1176,7 +1177,7 @@ public sealed class Archetypes
     public bool IsDataComponent(ulong component) =>
             !TypeData.Tags.Contains(component) || IsDataRelationship(component);
 
-    /// <param name="redundantType">Specifies what relation and entity shouldn't be copied, meaning every eventIndex with specified relation or entity won't be copied)</param>
+    /// <param name="redundantType">Specifies what relation and _entity shouldn't be copied, meaning every eventIndex with specified relation or _entity won't be copied)</param>
     public void CopyEntityComponents(Entity entityCopy, Entity entiyToCopy, bool copyChildren = false, ulong redundantType = 0)
     {
         var toCopyArchetype = GetArchetype(entiyToCopy);

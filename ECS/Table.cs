@@ -10,8 +10,9 @@ public sealed class Table
 
     private Array[] _storages;
     private readonly Dictionary<ulong, int> _indices;
-    private SortedSet<ulong> _components;
-    private Archetypes _archetypes;
+    private readonly SortedSet<ulong> _components;
+    private readonly Archetypes _archetypes;
+    private ulong _lastEntity;
 
     public Table(Archetypes archetypes, SortedSet<ulong> components, int defaultCapacity, int relationshipsCapacity)
     {
@@ -69,13 +70,14 @@ public sealed class Table
         if (!_indices.TryGetValue(type, out var index))
             return false;
 
-        storage =  Unsafe.As<T[]>(_storages[index]);
+        storage = Unsafe.As<T[]>(_storages[index]);
         return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Add()
+    public int Add(Entity entity)
     {
+        _lastEntity = entity;
         EnsureCapacity(Count + 1);
         return Count++;
     }
@@ -85,18 +87,15 @@ public sealed class Table
     {
         Count--;
 
-        if (Count < 0)
-        {
+        if (row >= Count)
+            return;
 
+        foreach (var storage in _storages)
+        {
+            Array.Copy(storage, Count, storage, row, 1);
         }
 
-        if (row < Count)
-        {
-            foreach (var storage in _storages)
-            {
-                Array.Copy(storage, Count, storage, row, 1);
-            }
-        }
+        _archetypes.GetEntityRecord(_lastEntity).tableRow = row;
     }
 
     public static void RemoveEntities(Archetype archetype)

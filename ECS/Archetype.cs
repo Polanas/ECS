@@ -67,12 +67,12 @@ public sealed class Archetype
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int Add(ulong identity, out int tableRow, bool addToTable = true)
+    public int Add(ulong entity, out int tableRow, bool addToTable = true)
     {
-        tableRow = addToTable ? _table.Add() : -1;
+        tableRow = addToTable ? _table.Add(entity) : -1;
 
         EnsureCapacity(Count + 1);
-        _entities[(ulong)Count] = identity;
+        _entities[(ulong)Count] = entity;
         return Count++;
     }
 
