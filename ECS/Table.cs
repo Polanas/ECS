@@ -8,15 +8,16 @@ public sealed class Table
     public SortedSet<ulong> Components => _components;
     public int Count { get; private set; }
 
-    private Array[] _storages;
+    private readonly Array[] _storages;
     private readonly Dictionary<ulong, int> _indices;
     private readonly SortedSet<ulong> _components;
     private readonly Archetypes _archetypes;
-    private ulong _lastEntity;
+    private ulong[] _entites = null!; 
 
     public Table(Archetypes archetypes, SortedSet<ulong> components, int defaultCapacity, int relationshipsCapacity)
     {
         _indices = new();
+        _entites = new ulong[defaultCapacity];
         _archetypes = archetypes;
 
         _components = GetTypes(components);
@@ -77,7 +78,11 @@ public sealed class Table
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Add(Entity entity)
     {
-        _lastEntity = entity;
+        if (_components.Count == 1 && _components.First() == 0)
+        {
+
+        }
+        _entites[Count] = entity;
         EnsureCapacity(Count + 1);
         return Count++;
     }
@@ -86,6 +91,10 @@ public sealed class Table
     public void Remove(int row)
     {
         Count--;
+        if (Count < 0)
+        {
+
+        }
 
         if (row >= Count)
             return;
@@ -95,7 +104,8 @@ public sealed class Table
             Array.Copy(storage, Count, storage, row, 1);
         }
 
-        _archetypes.GetEntityRecord(_lastEntity).tableRow = row;
+        _archetypes.GetEntityRecord(_entites[Count]).tableRow = row;
+        _entites[row] = _entites[Count];
     }
 
     public static void RemoveEntities(Archetype archetype)
@@ -109,6 +119,8 @@ public sealed class Table
         {
             Array.Clear(storage);
         }
+
+        Array.Clear(table._entites);
 
         table.Count = 0;
     }
@@ -201,5 +213,7 @@ public sealed class Table
             Array.Copy(_storages[i], newStorage, capacity - 1);
             _storages[i] = newStorage;
         }
+
+        Array.Resize(ref _entites, newCapacity);
     }
 }

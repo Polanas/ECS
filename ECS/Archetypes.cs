@@ -301,7 +301,12 @@ public sealed class Archetypes
                         continue;
 
                     oldArchetype = GetArchetype(operation.entity);
-                    RemoveComponent(operation.type, operation.entity, out _, out _, operation.index == -1);
+                    RemoveComponent(
+                        operation.type,
+                        operation.entity,
+                        out _,
+                        out _,
+                        !IsDataComponent(operation.type));
 
                     if (operation.type != componentType)
                         TryCallOnComponentRemoveSystems(operation.entity, oldArchetype, operation.type);
@@ -309,7 +314,12 @@ public sealed class Archetypes
                 case ArchetypeOperationType.AddComponent:
                     if (!HasComponent(operation.type, operation.entity))
                     {
-                        AddComponent(operation.type, operation.entity, out var archetype, out _, operation.index == -1);
+                        AddComponent(
+                            operation.type,
+                            operation.entity,
+                            out var archetype,
+                            out _,
+                            !IsDataComponent(operation.type));
                         if (operation.type != componentType)
                             TryCallOnComponentAddSystems(operation.entity, archetype, operation.type);
                     }
