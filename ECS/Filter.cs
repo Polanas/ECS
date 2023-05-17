@@ -90,6 +90,33 @@ public class Filter
 {
     public Mask Mask => _mask;
     public Archetypes Archetypes => archetypes;
+    public int Count 
+    {
+        get
+        {
+            int count = 0;
+
+            for (int i = 0; i < archetypesList.Count; i++)
+            {
+                count += archetypesList[i].Count;
+            }
+
+            return count;
+        }
+    }
+    public bool HasEntities
+    {
+        get
+        {
+            for (int i = 0; i < archetypesList.Count; i++)
+            {
+                if (archetypesList[i].Count > 0)
+                    return true;
+            }
+
+            return false;
+        }
+    }
 
     public readonly List<Archetype> archetypesList;
 
@@ -276,10 +303,10 @@ public struct Enumerator : IDisposable
 {
     private readonly List<Archetype> _archetypesList;
     private readonly Archetypes _archetypes;
+    private readonly ECSWorld _world;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private ECSWorld _world;
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList)
     {

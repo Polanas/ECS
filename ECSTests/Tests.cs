@@ -845,8 +845,25 @@ public class UnitTests
 
         int actual = entity.Get<Position>().Value.x;
 
-        Assert.AreEqual(expected, actual);
-
         entity.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void FilterCountTest()
+    {
+        int expected = 2;
+        
+        var filter = _world.Filter().All<Position>().All<Likes, Wildcard>().Build();
+        var e1 = _world.AddEntity().Add<Position>().Add<Likes, Apples>();
+        var e2 = _world.AddEntity().Add<Position>().Add<Likes, Oranges>();
+
+        int actual = filter.Count;
+
+        e1.Remove();
+        e2.Remove();
+
+        Assert.AreEqual(expected, actual);
     }
 }
