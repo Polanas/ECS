@@ -381,7 +381,7 @@ public sealed class ECSWorld
     {
         var comopnentIndex = IndexOf<T>();
         ref T component = ref _archetypes.GetComponent<T>(comopnentIndex, entity);
-        return new EntityWithComponent<T>(entity, comopnentIndex, Archetypes);
+        return new EntityWithComponent<T>(entity, comopnentIndex, Archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -553,7 +553,7 @@ public sealed class ECSWorld
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T>(relationship);
         ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T>(entity, relationship, _archetypes);
+        return new EntityWithComponent<T>(entity, relationship, _archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -566,7 +566,7 @@ public sealed class ECSWorld
         var relationship = _archetypes.GetRelationship(relation, target);
         var storage = archetype.GetStorage<T>(relationship);
         ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T>(entity, relationship, _archetypes);
+        return new EntityWithComponent<T>(entity, relationship, _archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -641,7 +641,7 @@ public sealed class ECSWorld
         var relationship = _archetypes.GetRelationship(relation, target);
         var storage = archetype.GetStorage<T1>(relationship);
         ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T1>(entity, relationship, _archetypes);
+        return new EntityWithComponent<T1>(entity, relationship, _archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -655,7 +655,7 @@ public sealed class ECSWorld
         var relationship = _archetypes.GetRelationship(relation, target);
         var storage = archetype.GetStorage<T2>(relationship);
         ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T2>(entity, relationship, _archetypes);
+        return new EntityWithComponent<T2>(entity, relationship, _archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

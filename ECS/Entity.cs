@@ -10,34 +10,31 @@ public unsafe struct EntityWithComponent<T> where T : struct
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
-            if (_lastArchetypeId != (*(EntityRecord*)_record).archetypeId)
+            ref var record = ref Unsafe.AsRef<EntityRecord>(_record);
+
+            if (_lastArchetypeId != record.archetypeId)
             {
-                ref var record = ref Unsafe.AsRef<EntityRecord>(_record);
                 var newTable = _archetypes.GetArchetypeFromRecord(ref record).Table;
                 if (newTable == _lastTable)
-                {
-                    var storage = _lastTable.GetStorage<T>();
-                    return ref storage[record.tableRow];
-                }
+                    return ref Unsafe.AsRef<T>(_value);
 
-                SetCurrentComponentReference();
+                SetCurrentComponentReference(ref record);
             }
 
-            ref var record1 = ref Unsafe.AsRef<EntityRecord>(_record);
-            var storage1 = _lastTable.GetStorage<T>(_component);
-            return ref storage1[record1.tableRow];
+            return ref Unsafe.AsRef<T>(_value);
         }
     }
 
-    private readonly Entity _entity;
     private readonly ulong _component;
     private readonly Archetypes _archetypes;
     private void* _record;
+    private void* _value;
     private int _lastArchetypeId;
     private Table _lastTable;
 
-    public EntityWithComponent(Entity entity, ulong component, Archetypes archetypes)
+    public EntityWithComponent(Entity entity, ulong component, Archetypes archetypes, ref T value)
     {
+        _value = Unsafe.AsPointer(ref value);
         ref var record = ref archetypes.GetEntityRecord(entity);
         _entity = entity;
         _component = component;
@@ -47,13 +44,15 @@ public unsafe struct EntityWithComponent<T> where T : struct
         _lastTable = archetypes.GetArchetypeFromRecord(ref record).Table;
     }
 
-    private void SetCurrentComponentReference()
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void SetCurrentComponentReference(ref EntityRecord record)
     {
-        ref var record = ref _archetypes.GetEntityRecord(_entity);
         var archetype = _archetypes.GetArchetypeFromRecord(ref record);
+        var storage = archetype.GetStorage<T>(_component);
         _lastArchetypeId = record.archetypeId;
         _lastTable = archetype.Table;
         _record = Unsafe.AsPointer(ref record);
+        _value = Unsafe.AsPointer(ref storage[record.tableRow]);
     }
 }
 
