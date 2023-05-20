@@ -79,12 +79,16 @@ public static class EntityExtensions
     }
 
 
-    public static EntityWithComponent<T> GetOrAdd<T>(this Entity entity) where T : struct
+    public static EntityWithComponent<T> GetOrAdd<T>(this Entity entity, T? value = default) where T : struct
     {
         if (!entity.world.HasComponent<T>(entity))
             Add<T>(entity);
 
-        return entity.world.GetComponent<T>(entity);
+        var component = entity.world.GetComponent<T>(entity);
+        if (value != null)
+            component.Value = value.Value;
+
+        return component;
     }
 
     public static Entity GetOrAdd(this Entity entity, Entity tag)
@@ -97,34 +101,46 @@ public static class EntityExtensions
         return entity;
     }
 
-    public static EntityWithComponent<T> GetOrAdd<T>(this Entity entity, Entity target) where T : struct
+    public static EntityWithComponent<T> GetOrAdd<T>(this Entity entity, Entity target, T? value = default) where T : struct
     {
         var world = entity.world;
 
         if (!world.HasRelationship<T>(entity, target))
             world.AddRelationship<T>(entity, target);
 
-        return world.GetRelationship<T>(entity, target);
+        var component = world.GetRelationship<T>(entity, target);
+        if (value != null)
+            component.Value = value.Value;
+
+        return component;
     }
 
-    public static EntityWithComponent<T1> GetOrAdd1<T1, T2>(this Entity entity) where T1 : struct where T2 : struct
+    public static EntityWithComponent<T1> GetOrAdd1<T1, T2>(this Entity entity, T1? value = default) where T1 : struct where T2 : struct
     {
         var world = entity.world;
 
         if (!world.HasRelationship<T1, T2>(entity))
             world.AddRelationship<T1, T2>(entity, default(T1));
 
-        return world.GetRelationship1<T1, T2>(entity);
+        var component = world.GetRelationship1<T1, T2>(entity);
+        if (value != null)
+            component.Value = value.Value;
+
+        return component;
     }
 
-    public static EntityWithComponent<T2> GetOrAdd2<T1, T2>(this Entity entity) where T1 : struct where T2 : struct
+    public static EntityWithComponent<T2> GetOrAdd2<T1, T2>(this Entity entity, T2? value = default) where T1 : struct where T2 : struct
     {
         var world = entity.world;
 
         if (!world.HasRelationship<T1, T2>(entity))
             world.AddRelationship<T1, T2>(entity, default(T2));
 
-        return world.GetRelationship2<T1, T2>(entity);
+        var component = world.GetRelationship2<T1, T2>(entity);
+        if (value != null)
+            component.Value = value.Value;
+
+        return component;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

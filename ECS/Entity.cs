@@ -36,7 +36,6 @@ public unsafe struct EntityWithComponent<T> where T : struct
     {
         _value = Unsafe.AsPointer(ref value);
         ref var record = ref archetypes.GetEntityRecord(entity);
-        _entity = entity;
         _component = component;
         _record = Unsafe.AsPointer(ref record);
         _archetypes = archetypes;
