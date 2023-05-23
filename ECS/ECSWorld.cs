@@ -488,14 +488,15 @@ public sealed class ECSWorld
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref T GetSingletonEvent<T>() where T : struct, ISingletonEvent
+    public EntityWithComponent<T> GetSingletonEvent<T>() where T : struct, ISingletonEvent
     {
         var index = IndexOf<T>();
 
         if (!HasComponent<T>(index))
             AddSingletonEvent<T>();
 
-        return ref _archetypes.GetComponent<T>(index, index);
+        ref var component = ref _archetypes.GetComponent<T>(index, index);
+        return new EntityWithComponent<T>(index, index, _archetypes, ref component);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

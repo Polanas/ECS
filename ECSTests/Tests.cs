@@ -427,9 +427,9 @@ public class UnitTests
 
         _world.AddSingletonEvent(new SingletonEvent { value = 1 });
         _world.AddSingletonEvent(new SingletonEvent { value = 2 });
-        _world.GetSingletonEvent<SingletonEvent>().value++;
+        _world.GetSingletonEvent<SingletonEvent>().Value.value++;
 
-        float actual = _world.GetSingletonEvent<SingletonEvent>().value;
+        float actual = _world.GetSingletonEvent<SingletonEvent>().Value.value;
         Assert.AreEqual(expected, actual);
     }
 
