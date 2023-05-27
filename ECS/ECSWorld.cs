@@ -380,8 +380,7 @@ public sealed class ECSWorld
     public EntityWithComponent<T> GetComponent<T>(Entity entity) where T : struct
     {
         var comopnentIndex = IndexOf<T>();
-        ref T component = ref _archetypes.GetComponent<T>(comopnentIndex, entity);
-        return new EntityWithComponent<T>(entity, comopnentIndex, Archetypes, ref component);
+        return new EntityWithComponent<T>(entity, comopnentIndex, Archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -495,8 +494,7 @@ public sealed class ECSWorld
         if (!HasComponent<T>(index))
             AddSingletonEvent<T>();
 
-        ref var component = ref _archetypes.GetComponent<T>(index, index);
-        return new EntityWithComponent<T>(index, index, _archetypes, ref component);
+        return new EntityWithComponent<T>(index, index, _archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -553,8 +551,7 @@ public sealed class ECSWorld
         ref var record = ref _archetypes.GetEntityRecord(entity);
         var archetype = _archetypes.GetArchetype(entity);
         var storage = archetype.GetStorage<T>(relationship);
-        ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T>(entity, relationship, _archetypes, ref component);
+        return new EntityWithComponent<T>(entity, relationship, _archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -566,8 +563,7 @@ public sealed class ECSWorld
         var archetype = _archetypes.GetArchetype(entity);
         var relationship = _archetypes.GetRelationship(relation, target);
         var storage = archetype.GetStorage<T>(relationship);
-        ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T>(entity, relationship, _archetypes, ref component);
+        return new EntityWithComponent<T>(entity, relationship, _archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -638,11 +634,8 @@ public sealed class ECSWorld
         var target = IndexOf<T2>();
 
         ref var record = ref _archetypes.GetEntityRecord(entity);
-        var archetype = _archetypes.GetArchetype(entity);
         var relationship = _archetypes.GetRelationship(relation, target);
-        var storage = archetype.GetStorage<T1>(relationship);
-        ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T1>(entity, relationship, _archetypes, ref component);
+        return new EntityWithComponent<T1>(entity, relationship, _archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -652,11 +645,8 @@ public sealed class ECSWorld
         var target = IndexOf<T2>();
 
         ref var record = ref _archetypes.GetEntityRecord(entity);
-        var archetype = _archetypes.GetArchetype(entity);
         var relationship = _archetypes.GetRelationship(relation, target);
-        var storage = archetype.GetStorage<T2>(relationship);
-        ref var component = ref storage[record.tableRow];
-        return new EntityWithComponent<T2>(entity, relationship, _archetypes, ref component);
+        return new EntityWithComponent<T2>(entity, relationship, _archetypes);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

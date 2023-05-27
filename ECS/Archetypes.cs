@@ -192,6 +192,7 @@ public struct Wildcard { }
 public sealed class Archetypes
 {
     internal ECSWorld World => _world;
+    internal EntityRecord[] EntityRecrods => _entityRecords;
     internal Archetype EntityArchetype => ((Archetype?)_archetypes[0]!.Target)!;
 
     public const uint wildCard32 = uint.MaxValue;
