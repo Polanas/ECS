@@ -1,6 +1,4 @@
-﻿using ECS;
-
-namespace ECS;
+﻿namespace ECS;
 
 public static class RelationshipExtensions
 {

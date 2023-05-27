@@ -1,6 +1,4 @@
-﻿using ECS;
-using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace ECS;
 
@@ -10,7 +8,7 @@ namespace ECS;
 internal static class PairHelper
 {
 #if DEBUG
-    private static Dictionary<Type, bool> _cachedTypes = new();
+    private static readonly Dictionary<Type, bool> _cachedTypes = new();
 #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
