@@ -820,14 +820,13 @@ public sealed class Archetypes
         record.tableRow = newTableRow;
         record.archetypeId = newArchetype.id;
 
-        TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
-
-        var storage = newArchetype.GetStorage<T>();
-        storage[newTableRow] = default;
-
-        ref var item = ref storage[newTableRow];
+        ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
+        item = default;
         item = value;
         AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
+
+        if (typeIndex != componentType)
+            TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
     }
 
     public bool RemoveComponent(ulong typeIndex, Entity entity, out Archetype newArchetype, out bool isNewArchetypeNull, bool reuseTable = false)
