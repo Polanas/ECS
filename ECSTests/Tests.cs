@@ -854,7 +854,7 @@ public class UnitTests
     public void FilterCountTest()
     {
         int expected = 2;
-        
+
         var filter = _world.Filter().All<Position>().All<Likes, Wildcard>().Build();
         var e1 = _world.AddEntity().Add<Position>().Add<Likes, Apples>();
         var e2 = _world.AddEntity().Add<Position>().Add<Likes, Oranges>();
@@ -865,5 +865,12 @@ public class UnitTests
         e2.Remove();
 
         Assert.AreEqual(expected, actual);
+    }
+
+    public void EntityRemoveComponentActionTest()
+    {
+        var entity = _world.AddEntity().Add<Position>().Add<MyRelation, Apples>();
+
+        entity.Remove();
     }
 }

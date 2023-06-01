@@ -85,7 +85,7 @@ internal struct ArchetypeOperationStorage
     public Array array;
     public int count;
 
-    private Type _elementType;
+    private readonly Type _elementType;
 
     public ArchetypeOperationStorage(Array array, Type elementType)
     {
@@ -149,9 +149,9 @@ public interface IAutoReset<T> where T : struct
 
 internal delegate void AutoReset<T>(ref T component, AutoResetState state) where T : struct;
 
-internal static class AutoResets<T> where T : struct
+internal static class Pools<T> where T : struct
 {
-    public static AutoReset<T> Handler { get; set; } = null!;
+    public static Pool<T> Pool { get; set; } = null!;
 }
 
 public struct Component
@@ -196,7 +196,7 @@ public sealed class Archetypes
     internal Archetype EntityArchetype => ((Archetype?)_archetypes[0]!.Target)!;
 
     public const uint wildCard32 = uint.MaxValue;
-    // since gen/_entity is only 31 bits, it needs separate wildCard Instance
+    // since relationships target is only 31 bits, it needs separate wildCard instance
     public const uint wildCard31 = uint.MaxValue >> 1;
     public const ulong componentType = 1;
     public const int singletonComponentCapacity = 1;
@@ -222,6 +222,7 @@ public sealed class Archetypes
     private readonly List<ArchetypeOperation> _archetypeOperations;
     private readonly List<OnComponentActionSystem> _onComponentSystems;
     private readonly Dictionary<int, List<OnComponentActionSystem>> _onComponentSystemsByArchetypeIds;
+    private readonly Dictionary<ulong, IPool> _poolsByComponents;
     private EntityRecord[] _entityRecords;
     private readonly ECSWorld _world;
     private uint _entityCount = 1;
@@ -247,6 +248,7 @@ public sealed class Archetypes
         _archetypesByTypes = new();
         _archetypesByHashes = new();
         _onComponentSystemsByArchetypeIds = new();
+        _poolsByComponents = new();
         wildCardRelationship = IdConverter.Compose(wildCard32, wildCard32, true);
 
         TypeData.AddTypeAndIndex(typeof(Entity), entityType);
@@ -595,7 +597,7 @@ public sealed class Archetypes
         }
     }
 
-    /// <returns>Wether new archetypeRefsList existed previously or not.</returns>
+    /// <returns>True, if a new archetype didn't exsist previously. Otherwise, false.</returns>
     public bool AddComponent(ulong typeIndex, Entity entity, out Archetype newArchetype, out int newTableRow, bool reuseTable = false, int customComponentsCapacity = -1)
     {
         int finalComponentsCapacity = customComponentsCapacity > 0 ? customComponentsCapacity : componentsCapacity;
@@ -664,18 +666,12 @@ public sealed class Archetypes
     {
 #if DEBUG
         if (Unsafe.SizeOf<T>() == 1)
-            throw new Exception($"Cannot add a component {typeof(T).Name} with no data .");
+            throw new Exception($"Cannot add a component {typeof(T).Name} with no data");
 #endif
 
         Type type = null!;
 
         var fakeInstace = default(T);
-        if (AutoResets<T>.Handler == null && fakeInstace is IAutoReset<T>)
-        {
-            type = typeof(T);
-            var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
-            AutoResets<T>.Handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
-        }
 
         if (_locked)
         {
@@ -699,18 +695,28 @@ public sealed class Archetypes
 
             ref var item1 = ref AddArchetypeOperation<T>(entity, GetComponentIndex<T>(), ArchetypeOperationType.AddComponent);
 
+            if (Pools<T>.Pool == null && fakeInstace is IAutoReset<T>)
+                AddPool<T>(typeIndex);
+
             item1 = value;
-            AutoResets<T>.Handler?.Invoke(ref item1, AutoResetState.OnAdd);
+            Pools<T>.Pool?.CallAutoReset(ref item1, AutoResetState.OnAdd);
 
             return;
         }
 
         bool isNewArchetypeNull = AddComponent(typeIndex, entity, out var newArchetype, out int newTableRow, false, customComponentsCapacity);
 
+        if (isNewArchetypeNull &&
+            Pools<T>.Pool == null &&
+            fakeInstace is IAutoReset<T>)
+        {
+            AddPool<T>(typeIndex);
+        }
+
         ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
         item = fakeInstace;
         item = value;
-        AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
+        Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnAdd);
 
         if (typeIndex != componentType)
             TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
@@ -729,15 +735,10 @@ public sealed class Archetypes
             return;
         }
 
-        if (AddComponent(typeIndex, entity, out var newArchetype, out var newTableRow, true))
+        if (AddComponent(typeIndex, entity, out _, out _, true) &&
+            default(T) is IAutoReset<T>)
         {
-            if (new T() is IAutoReset<T>)
-            {
-                var type = typeof(T);
-
-                var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
-                AutoResets<T>.Handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
-            }
+            AddPool<T>(typeIndex);
         }
     }
 
@@ -768,16 +769,14 @@ public sealed class Archetypes
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
+        if (Pools<T>.Pool == null && default(T) is IAutoReset<T>)
+            AddPool<T>(typeIndex);
+
         if (_locked)
         {
             var type = typeof(T);
-            if (AutoResets<T>.Handler == null && default(T) is IAutoReset<T>)
-            {
-                var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
-                AutoResets<T>.Handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
-            }
 
-            ref var item1 = ref AddArchetypeOperation<T>(entity, GetComponentIndex<T>(), ArchetypeOperationType.AddComponent);
+            ref var item1 = ref AddArchetypeOperation<T>(entity, typeIndex, ArchetypeOperationType.AddComponent);
             item1 = value;
             return;
         }
@@ -806,13 +805,6 @@ public sealed class Archetypes
 
             var newEdge = newArchetype.GetTableEdge(typeIndex);
             newEdge.Remove = oldArchetypeRef;
-
-            if (AutoResets<T>.Handler == null && default(T) is IAutoReset<T>)
-            {
-                var type = typeof(T);
-                var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
-                AutoResets<T>.Handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
-            }
         }
 
         var newArchetypeRow = Table.MoveEntity(entity, record.archetypeRow, record.tableRow, oldArchetype, newArchetype, out int newTableRow);
@@ -823,7 +815,7 @@ public sealed class Archetypes
         ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
         item = default;
         item = value;
-        AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnAdd);
+        Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnAdd);
 
         if (typeIndex != componentType)
             TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
@@ -840,8 +832,8 @@ public sealed class Archetypes
         {
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
-            throw new Exception($"Cannot add non-existent component {componentName} to _entity {entityName}.");
-            }
+            throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
+        }
 #endif
 
         var oldEdge = oldArchetype.GetTableEdge(typeIndex);
@@ -897,13 +889,6 @@ public sealed class Archetypes
 
     public bool RemoveComponent<T>(ulong typeIndex, Entity entity) where T : struct
     {
-        if (AutoResets<T>.Handler == null && default(T) is IAutoReset<T>)
-        {
-            var type = typeof(T);
-            var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
-            AutoResets<T>.Handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
-        }
-
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
@@ -911,7 +896,7 @@ public sealed class Archetypes
         if (Unsafe.SizeOf<T>() > 1)
         {
             ref var item = ref oldArchetype.GetStorage<T>()[record.tableRow];
-            AutoResets<T>.Handler?.Invoke(ref item, AutoResetState.OnRemove);
+            Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnRemove);
         }
 
         if (_locked)
@@ -921,7 +906,7 @@ public sealed class Archetypes
 #if DEBUG
                 var entityName = GetEntityNameOrValue(entity);
                 var componentName = GetComponentNameOrValue(typeIndex);
-                throw new Exception($"Cannot add non-existent component {componentName} to _entity {entityName}.");
+                throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
 #else
                     return true;
 #endif
@@ -952,7 +937,7 @@ public sealed class Archetypes
         {
             var entityName = GetEntityNameOrValue(entity);
             var componentName = GetComponentNameOrValue(typeIndex);
-            throw new Exception($"Cannot get non-existent component {componentName} from _entity{entityName}");
+            throw new Exception($"Cannot get non-existent component {componentName} from entity{entityName}");
         }
 #endif
 
@@ -965,7 +950,7 @@ public sealed class Archetypes
         if (!IsEntityAlive(entity))
         {
 #if DEBUG
-            throw new Exception($"Cannot remove a dead _entity {entity.value}");
+            throw new Exception($"Cannot remove a dead entity {entity.value}");
 #else
             return;
 #endif
@@ -981,7 +966,7 @@ public sealed class Archetypes
         var archetypeRef = _archetypes[record.archetypeId];
         var archetype = ((Archetype?)archetypeRef!.Target)!;
 
-        HandleEntityDeletion(ref record);
+        HandleEntityDeletion(ref record, archetype);
 
         archetype.Remove(record.archetypeRow, record.tableRow);
         record.archetypeRow = record.tableRow = record.archetypeId = -1;
@@ -1187,7 +1172,7 @@ public sealed class Archetypes
     public bool IsDataComponent(ulong component) =>
             !TypeData.Tags.Contains(component) || IsDataRelationship(component);
 
-    /// <param name="redundantType">Specifies what relation and _entity shouldn't be copied, meaning every eventIndex with specified relation or _entity won't be copied)</param>
+    /// <param name="redundantType">Specifies what relation and entity shouldn't be copied, meaning every eventIndex with specified relation or entity won't be copied)</param>
     public void CopyEntityComponents(Entity entityCopy, Entity entiyToCopy, bool copyChildren = false, ulong redundantType = 0)
     {
         var toCopyArchetype = GetArchetype(entiyToCopy);
@@ -1274,6 +1259,18 @@ public sealed class Archetypes
         return archetypes.Contains(archetype);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void AddPool<T>(ulong component) where T : struct
+    {
+        var type = typeof(T);
+        var autoResetMethod = type.GetMethod(nameof(IAutoReset<T>.AutoReset))!;
+        var handler = (AutoReset<T>)Delegate.CreateDelegate(typeof(AutoReset<T>), null, autoResetMethod);
+        var pool = new Pool<T>(_world, handler);
+
+        _poolsByComponents.Add(component, pool);
+        Pools<T>.Pool = pool;
+    }
+
     private void TryAddFilterWithTargets(Filter filter)
     {
         var mask = filter.Mask;
@@ -1341,8 +1338,21 @@ public sealed class Archetypes
         }
     }
 
-    private void HandleEntityDeletion(ref EntityRecord record)
+    private void HandleEntityDeletion(ref EntityRecord record, Archetype arhetype)
     {
+        foreach (var component in arhetype.components)
+        {
+          TryCallOnComponentRemoveSystemsWithSingleComponent(
+              record.entity,
+              arhetype,
+              component);
+
+            if (!_poolsByComponents.TryGetValue(component, out var pool))
+                continue;
+
+            pool.CallAutoReset(record.entity, AutoResetState.OnRemove);
+        }
+
         if (record.HasRelationships())
         {
             var childOfRelarionship = _world.FindRelationship<ChildOf, Wildcard>(record.entity);
@@ -2000,6 +2010,58 @@ public sealed class Archetypes
 
         foreach (var onComponentSystem in onComponentSystems!)
         {
+            var allComponents = onComponentSystem.allComponentsHashset;
+            var anyComponents = onComponentSystem.anyComponents;
+            bool allComponentsContains =
+                allComponents.Contains(removedComponent) ||
+                allComponents.Contains(componentWildcard) ||
+                allComponents.Contains(wildcardComponent);
+
+            if (allComponentsContains && anyComponents.Count == 0)
+            {
+                onComponentSystem.OnComponentRemove(entity);
+                continue;
+            }
+            else if (anyComponents.Count == 0)
+            {
+                continue;
+            }
+
+            bool anyComponentsContains =
+               anyComponents.Contains(removedComponent) ||
+               anyComponents.Contains(componentWildcard) ||
+               anyComponents.Contains(wildcardComponent);
+
+            if (!allComponentsContains || !anyComponentsContains)
+                continue;
+
+            onComponentSystem.OnComponentRemove(entity);
+        }
+    }
+
+    private void TryCallOnComponentRemoveSystemsWithSingleComponent(
+      Entity entity,
+      Archetype archetype,
+      ulong removedComponent)
+    {
+        if (!_onComponentSystemsByArchetypeIds.TryGetValue(archetype.id, out var onComponentSystems))
+            return;
+
+        var componentWildcard = IdConverter.Compose(
+           IdConverter.GetFirst(removedComponent),
+           wildCard32,
+           true);
+        var wildcardComponent = IdConverter.Compose(
+            wildCard32,
+            IdConverter.GetSecond(removedComponent),
+            true);
+
+        foreach (var onComponentSystem in onComponentSystems!)
+        {
+            if (onComponentSystem.allComponents.Count > 1 ||
+                onComponentSystem.anyComponents.Count > 1)
+                continue;
+
             var allComponents = onComponentSystem.allComponentsHashset;
             var anyComponents = onComponentSystem.anyComponents;
             bool allComponentsContains =
