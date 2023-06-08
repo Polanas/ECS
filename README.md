@@ -32,7 +32,7 @@ bool alive = entity.IsAlive();
 entity.Remove();
 ```
 ### Components
-> Note: if all components are deleted from an entity, the entity itself will de deleted.
+> Note: if all components are deleted from an entity, the entity itself will be deleted.
 ```cs
 //components are represented as structs.
 struct Velocity { public float x, y; }
@@ -45,8 +45,8 @@ var entity = world.AddEntity();
 entity.Add(new Velocity { x = 5, y = 5 });
 
 //getting a component by reference
-ref var velocity = ref entity.Get<Velocity>();
-velocity.x++;
+var velocity = entity.Get<Velocity>();
+velocity.Value.x++;
 
 //does this entity have Velocity?
 bool hasVelocity = entity.Has<Velocity>();
@@ -147,8 +147,11 @@ var relationWithPlayerFilter = world.Filter().All<Wildcard>(world.GetEntity("pla
 ```
 #### Getting Data From Relationships
 ```cs
-//use Pair1 to get data from the first part, and Pair2 for the second part
-var filter = world.Filter<Pair2<Begin, Position>, Pair2<Owes, Apples>>().Build();
+//use TermN() to specify which relationships correspond to each value
+var filter = world.Filter<Position, Owes>()
+    .Term1().First<Begin>()
+    .Term2().Second<Apples>()
+    .Build();
 
 foreach (var entry in filter)
 {
