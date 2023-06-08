@@ -161,7 +161,6 @@ foreach (var entry in filter)
 ```
 ### Systems
 Systems run all the logic; they are represented as classes which can implement a bunch of interfaces (IUpdateSystem, IPostUpdateSystem, IInitSystem, IPreInitSystem, IDestroySystem).
-Also, systems can subscribe to adding and removing of component(s) via inheritance from OnComponentActionSystem class.
 ```cs
 //systems are classes
 class MoveSystem : IInitSystem, IUpdateSystem
@@ -213,6 +212,28 @@ systems
 
 //now gameLoop group is active
 _serviceSystems.SetGroupState("gameLoop", true);
+```
+#### OnComponentAction Systems
+These systems subscribe to addition and removal of certain components.
+```cs
+class OnComponentSystemTest : OnComponentActionSystem
+{
+    public OnComponentSystemTest()
+    {
+        //you can also use None() and Any() here
+        All<Position>();
+    }
+
+    public override void OnComponentAdd(Entity entity)
+    {
+        Console.WriteLine($"Position component was added to {entity}!");
+    }
+
+    public override void OnComponentRemove(Entity entity)
+    {
+        Console.WriteLine($"Position component was removed to {entity}!");
+    }
+}
 ```
 #### Shared Data
 A single instance of an object can be stored in a world to be accessed later.
