@@ -1027,7 +1027,10 @@ public sealed class Archetypes
         return ref _entityRecords[index];
     }
 
-    public Filter GetFilter(Mask mask, Func<Archetypes, Mask, List<Archetype>, Filter> createFilter)
+    public Filter GetFilter(
+        Mask mask,
+        Func<Archetypes, Mask, List<Archetype>, List<ulong>, Filter> createFilter,
+        List<ulong> terms = null!)
     {
         var hash = mask.GetHashCode();
 
@@ -1040,8 +1043,8 @@ public sealed class Archetypes
 
                 var filterMask = filter.Mask;
 
-                if (filterMask.hasTypes.SetEquals(mask.hasTypes) &&
-                    filterMask.notTypes.SetEquals(mask.notTypes) &&
+                if (filterMask.allTypes.SetEquals(mask.allTypes) &&
+                    filterMask.noneTypes.SetEquals(mask.noneTypes) &&
                     filterMask.anyTypes.SetEquals(mask.anyTypes))
                 {
                     MaskPool.Add(mask);
@@ -1058,15 +1061,15 @@ public sealed class Archetypes
         var matchingArchetypes = new List<Archetype>();
 
 #if DEBUG
-        if (mask.hasTypes.Count == 0 && mask.anyTypes.Count == 0)
+        if (mask.allTypes.Count == 0 && mask.anyTypes.Count == 0)
             throw new Exception("A filterRef can't have zero All and Any arguments");
 #endif
 
-        var firstType = mask.hasTypes.Count > 0 ? mask.hasTypes.First() : mask.anyTypes.First();
+        var firstType = mask.allTypes.Count > 0 ? mask.allTypes.First() : mask.anyTypes.First();
         if (_archetypesByTypes.ContainsKey(firstType))
             FindArchetypesCompatibleWith(mask, matchingArchetypes);
 
-        var newFilter = createFilter(this, mask, matchingArchetypes);
+        var newFilter = createFilter(this, mask, matchingArchetypes, terms);
         var newFilterRef = new WeakReference(newFilter);
         filterRefsList.Add(newFilterRef);
 
@@ -1289,7 +1292,7 @@ public sealed class Archetypes
             filters.Add(filter);
         }
 
-        foreach (var type in mask.hasTypes)
+        foreach (var type in mask.allTypes)
         {
             if (!ComponentMightBeEntity(type))
                 continue;
@@ -1677,9 +1680,9 @@ public sealed class Archetypes
     {
         var matchingWithAnyArchetypes = new HashSet<Archetype>();
 
-        if (mask.hasTypes.Count > 0)
+        if (mask.allTypes.Count > 0)
         {
-            var archetypesWithFirstHasType = _archetypesByTypes[mask.hasTypes.First()];
+            var archetypesWithFirstHasType = _archetypesByTypes[mask.allTypes.First()];
             foreach (var archetype in archetypesWithFirstHasType)
                 if (MaskCompatibleWith(mask, archetype))
                     matchingArchetypes.Add(archetype);
@@ -1726,16 +1729,16 @@ public sealed class Archetypes
 
     private bool MaskCompatibleWith(Mask mask, Archetype archetype)
     {
-        if (mask.hasTypes.Count > archetype.components.Count)
+        if (mask.allTypes.Count > archetype.components.Count)
             return false;
 
-        foreach (var notType in mask.notTypes)
+        foreach (var notType in mask.noneTypes)
         {
             if (HasComponent(notType, archetype))
                 return false;
         }
 
-        foreach (var hasType in mask.hasTypes)
+        foreach (var hasType in mask.allTypes)
         {
             if (IdConverter.IsRelationship(hasType) && TypeCompatibleWith(archetype.components, hasType))
                 continue;
@@ -1750,10 +1753,10 @@ public sealed class Archetypes
 
     private bool MaskCompatibleWithAny(Mask mask, Archetype archetype)
     {
-        if (mask.hasTypes.Count > archetype.components.Count)
+        if (mask.allTypes.Count > archetype.components.Count)
             return false;
 
-        foreach (var notType in mask.notTypes)
+        foreach (var notType in mask.noneTypes)
         {
             if (HasComponent(notType, archetype))
                 return false;
@@ -1762,7 +1765,7 @@ public sealed class Archetypes
         if (mask.anyTypes.Count > 0 && !ArchetypeHasAnyType(archetype, mask.anyTypes))
             return false;
 
-        foreach (var hasType in mask.hasTypes)
+        foreach (var hasType in mask.allTypes)
         {
             if (IdConverter.IsRelationship(hasType) && TypeCompatibleWith(archetype.components, hasType))
                 continue;

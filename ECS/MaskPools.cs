@@ -20,3 +20,23 @@ internal static class MaskPool
         _stack.Push(mask);
     }
 }
+
+internal static class ListMaskPool
+{
+
+    private static readonly Stack<ListMask> _stack = new();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ListMask Get()
+    {
+        return _stack.Count > 0 ? _stack.Pop() : new ListMask();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Add(ListMask mask)
+    {
+        mask.Clear();
+        _stack.Push(mask);
+    }
+}
+

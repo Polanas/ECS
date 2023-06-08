@@ -24,9 +24,9 @@ internal static class IdConverter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ulong Compose(uint firstValue, uint secondValue, bool isRelation)
+    public static ulong Compose(uint firstValue, uint secondValue, bool isRelationship)
     {
-        return (((ulong)firstValue) << 32) | (((ulong)secondValue << 1) & uint.MaxValue) | (isRelation ? 1ul : 0ul);
+        return (((ulong)firstValue) << 32) | (((ulong)secondValue << 1) & uint.MaxValue) | (isRelationship ? 1ul : 0ul);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

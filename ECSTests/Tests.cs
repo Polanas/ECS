@@ -632,15 +632,26 @@ public class UnitTests
         Assert.AreEqual(actual, expected);
     }
 
+    
+
     [TestMethod]
     public void PairFilterTest()
     {
         float excepted = 7;
         float actual = 0;
+        
+        /*
+         * new API:
+         * var filter = _world.Filter<Owes, Owes, Owes>()
+         *     .Term1().Second<Apples>()
+         *     .Term2().Second<Oranges>()
+         *     .Term3().First(myEntity)
+         */
 
-        var filter = _world.Filter<Pair1<Owes, Apples>,
-                                   Pair1<Owes, Oranges>>()
-                                   .Build();
+        var filter = _world.Filter<Owes, Owes>()
+            .Term1().Second<Apples>()
+            .Term2().Second<Oranges>()
+            .Build();
 
         var entity = _world.AddEntity()
             .Add<Owes, Apples>(new Owes { Amount = 2 })
@@ -648,14 +659,14 @@ public class UnitTests
 
         foreach (var entry in filter)
         {
-            ref var owesApples = ref entry.item1.GetValue();
-            ref var owesOranges = ref entry.item2.GetValue();
+            ref var owesApples = ref entry.item1;
+            ref var owesOranges = ref entry.item2;
 
             owesApples.Amount++;
             owesOranges.Amount++;
 
-            actual += entry.item1.GetValue().Amount;
-            actual += entry.item2.GetValue().Amount;
+            actual += entry.item1.Amount;
+            actual += entry.item2.Amount;
         }
 
         entity.Remove();
