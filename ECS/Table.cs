@@ -31,9 +31,9 @@ public sealed class Table
 
         foreach (var (typeId, index) in _indices)
         {
-            bool isRelatonship = _archetypes.IsDataRelationship(typeId);
-            var typeIndex = isRelatonship ? _archetypes.GetDataRelationshipType(typeId) : TypeData.TypesByIndices[typeId];
-            _storages[index] = Array.CreateInstance(typeIndex, isRelatonship ? relationshipsCapacity : defaultCapacity);
+            bool isDataRelatonship = _archetypes.IsDataRelationship(typeId);
+            var typeIndex = isDataRelatonship ? _archetypes.GetDataRelationshipType(typeId) : TypeData.TypesByIndices[typeId];
+            _storages[index] = Array.CreateInstance(typeIndex, isDataRelatonship ? relationshipsCapacity : defaultCapacity);
         }
     }
 

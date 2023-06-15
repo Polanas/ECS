@@ -33,6 +33,9 @@ struct TagEvent : IEvent { }
 struct Likes { }
 
 struct MyRelation { }
+struct Color { }
+struct Green { int a; }
+struct Blue { int a; }
 
 struct Size : IAutoReset<Size>
 {
@@ -632,21 +635,13 @@ public class UnitTests
         Assert.AreEqual(actual, expected);
     }
 
-    
+
 
     [TestMethod]
-    public void PairFilterTest()
+    public void DataRelationshipTest()
     {
         float excepted = 7;
         float actual = 0;
-        
-        /*
-         * new API:
-         * var filter = _world.Filter<Owes, Owes, Owes>()
-         *     .Term1().Second<Apples>()
-         *     .Term2().Second<Oranges>()
-         *     .Term3().First(myEntity)
-         */
 
         var filter = _world.Filter<Owes, Owes>()
             .Term1().Second<Apples>()
@@ -878,10 +873,46 @@ public class UnitTests
         Assert.AreEqual(expected, actual);
     }
 
-    public void EntityRemoveComponentActionTest()
+    [TestMethod]
+    public void DataRelationshipTest2()
     {
-        var entity = _world.AddEntity().Add<Position>().Add<MyRelation, Apples>();
+        int expected = 5;
+        int actual = 0;
 
-        entity.Remove();
+        var apples = _world.AddEntity();
+        var e = _world.AddEntity().Add<Owes>(apples, new() { Amount = 2 });
+        var e1 = _world.AddEntity().Add<Owes>(apples, new() { Amount = 3 });
+
+        var filter = _world.Filter<Owes>()
+            .Term1().Second(apples).Build();
+
+        foreach (var entry in filter)
+        {
+            actual += entry.item.Amount;
+        }
+
+        e.Remove();
+        e1.Remove();
+        //TODO: make sure that filters and archetypes get deleted here
+        apples.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void ExclusiveRelationshipsTest()
+    {
+        _world.SetExclusive<Color>(true);
+
+        var e = _world.AddEntity().Add2<Color, Blue>();
+        e.Add2<Color, Green>();
+
+        bool hasGreenColor = e.Has<Color, Green>();
+        bool hasBLueColor = e.Has<Color, Blue>();
+
+        e.Remove();
+
+        Assert.IsTrue(hasGreenColor);
+        Assert.IsFalse(hasBLueColor);
     }
 }

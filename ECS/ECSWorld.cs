@@ -221,49 +221,9 @@ public sealed class ECSWorld
     public Relationship FindRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relationshipToFind = GetRelationship<T>(target);
-        var targetToFind = relationshipToFind.GetTarget();
-        var targetIndex = IdConverter.GetFirst(targetToFind);
         var relationToFind = relationshipToFind.GetRelation();
-        var relationIndex = IdConverter.GetFirst(relationToFind);
 
-        if (relationshipToFind == _archetypes.wildCardRelationship)
-        {
-            var enumerator = GetRelationships(entity).GetEnumerator();
-            if (enumerator.MoveNext())
-                return enumerator.Current;
-
-            return 0;
-        }
-        else if (relationIndex == Archetypes.wildCard32)
-        {
-            foreach (var relationship in entity.GetRelationships())
-            {
-                if (GetRelationshipTarget(relationship) != targetToFind)
-                    continue;
-
-                return new(this, relationship);
-            }
-        }
-        else if (targetIndex == Archetypes.wildCard32)
-        {
-            foreach (var relationship in entity.GetRelationships())
-            {
-                if (GetRelationshipRelation(relationship) != relationToFind)
-                    continue;
-
-                return new(this, relationship);
-            }
-        }
-        else
-        {
-            foreach (var relationship in entity.GetRelationships())
-            {
-                if (relationship == relationshipToFind)
-                    return new(this, relationship);
-            }
-        }
-
-        return 0;
+        return FindRelationship(entity, relationToFind, target);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -271,23 +231,29 @@ public sealed class ECSWorld
     {
         var relationshipToFind = GetRelationship<T1, T2>();
         var targetToFind = relationshipToFind.GetTarget();
-        var targetIndex = IdConverter.GetFirst(targetToFind);
         var relationToFind = relationshipToFind.GetRelation();
+
+        return FindRelationship(entity, targetToFind, relationToFind);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public Relationship FindRelationship(Entity entity, Entity relationToFind, Entity targetToFind, ulong relationshipToSkip = 0)
+    {
+        var relationshipToFind = GetRelationship(relationToFind, targetToFind);
+        var targetIndex = IdConverter.GetFirst(targetToFind);
         var relationIndex = IdConverter.GetFirst(relationToFind);
 
         if (relationshipToFind == _archetypes.wildCardRelationship)
         {
-            var enumerator = GetRelationships(entity).GetEnumerator();
-            if (enumerator.MoveNext())
-                return enumerator.Current;
-
-            return 0;
+            foreach (var relationship in GetRelationships(entity))
+                return relationship;
         }
         else if (relationIndex == Archetypes.wildCard32)
         {
             foreach (var relationship in GetRelationships(entity))
             {
-                if (GetRelationshipTarget(relationship) != targetToFind)
+                if (GetRelationshipTarget(relationship) != targetToFind
+                    || relationship == relationshipToSkip)
                     continue;
 
                 return new(this, relationship);
@@ -297,7 +263,8 @@ public sealed class ECSWorld
         {
             foreach (var relationship in GetRelationships(entity))
             {
-                if (GetRelationshipRelation(relationship) != relationToFind)
+                if (GetRelationshipRelation(relationship) != relationToFind
+                    || relationship == relationshipToSkip)
                     continue;
 
                 return new(this, relationship);
@@ -307,7 +274,8 @@ public sealed class ECSWorld
         {
             foreach (var relationship in GetRelationships(entity))
             {
-                if (relationship == relationshipToFind)
+                if (relationship == relationshipToFind
+                    || relationship == relationshipToSkip)
                     return new(this, relationship);
             }
         }
@@ -341,7 +309,13 @@ public sealed class ECSWorld
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipIs(ulong relationship, ulong relation, ulong target) =>
-      relationship == IdConverter.Compose(IdConverter.GetFirst(target), IdConverter.GetFirst(target), true);
+        relationship == IdConverter.Compose(IdConverter.GetFirst(relation), IdConverter.GetFirst(target), true);
+
+    public void SetExclusive<T>(bool isExclusive) where T : struct
+    {
+        var component = IndexOf<T>();
+        _archetypes.SetExclusive(component, isExclusive);
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity AddEntity(string? name = default)
@@ -548,9 +522,6 @@ public sealed class ECSWorld
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public EntityWithComponent<T> GetRelationship<T>(Entity entity, ulong relationship) where T : struct
     {
-        ref var record = ref _archetypes.GetEntityRecord(entity);
-        var archetype = _archetypes.GetArchetype(entity);
-        var storage = archetype.GetStorage<T>(relationship);
         return new EntityWithComponent<T>(entity, relationship, _archetypes);
     }
 
@@ -558,11 +529,7 @@ public sealed class ECSWorld
     public EntityWithComponent<T> GetRelationship<T>(Entity entity, Entity target) where T : struct
     {
         var relation = IndexOf<T>();
-
-        ref var record = ref _archetypes.GetEntityRecord(entity);
-        var archetype = _archetypes.GetArchetype(entity);
         var relationship = _archetypes.GetRelationship(relation, target);
-        var storage = archetype.GetStorage<T>(relationship);
         return new EntityWithComponent<T>(entity, relationship, _archetypes);
     }
 
@@ -585,6 +552,50 @@ public sealed class ECSWorld
         }
 
         _archetypes.RemoveDataRelationship(entity, relation, target);
+    }
+
+    /// <summary>
+    /// This method assumes that both T1 and T2 don't contain any data
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void AddRelationship<T1, T2>(Entity entity) where T1 : struct where T2 : struct
+    {
+        var relation = IndexOf<T1>();
+        var target = IndexOf<T2>();
+        var relationship = _archetypes.GetRelationship(relation, target);
+
+        _archetypes.AddRelationship(entity, relation, target);
+#if DEBUG
+        string relationshipName = string.Empty;
+        string relationName = string.Empty;
+        string targetName = string.Empty;
+        string entityName = string.Empty;
+
+        if (Unsafe.SizeOf<T1>() != 1 || Unsafe.SizeOf<T2>() != 1)
+        {
+            relationshipName = _archetypes.GetComponentNameOrValue(relationship);
+            relationName = _archetypes.GetComponentNameOrValue(relation);
+            targetName = _archetypes.GetComponentNameOrValue(target);
+            entityName = _archetypes.GetEntityNameOrValue(entity);
+        }
+        if (Unsafe.SizeOf<T1>() != 1 && Unsafe.SizeOf<T2>() != 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} and {targetName} contains data");
+        }
+        else if (Unsafe.SizeOf<T2>() != 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {targetName} contains data");
+        }
+        else if (Unsafe.SizeOf<T1>() != 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} contains data");
+        }
+#endif
+
+        var oldArchetype = _archetypes.GetArchetype(entity);
+
+        if (oldArchetype.GetTableEdge(relationship).Add == null)
+            GetComponent<Component>(relation).Value.size = Unsafe.SizeOf<T1>();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

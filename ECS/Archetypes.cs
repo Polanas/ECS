@@ -49,6 +49,12 @@ public struct EntityRecord
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void SetHasRelationsips(bool value) => additionalData.Set(3, value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsExclusive() => additionalData.Get(4);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void SetExclusive(bool value) => additionalData.Set(4, value);
 }
 
 internal struct OnComponentSystems
@@ -447,6 +453,12 @@ public sealed class Archetypes
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Archetype GetArchetypeFromRecord(ref EntityRecord record) =>
         ((Archetype?)_archetypes[record.archetypeId].Target)!;
+
+    public void SetExclusive(ulong comopnent, bool IsExclusive)
+    {
+        ref var record = ref GetEntityRecord(comopnent);
+        record.SetExclusive(IsExclusive);
+    }
 
     public Entity AddEntity()
     {
@@ -1262,6 +1274,43 @@ public sealed class Archetypes
         return archetypes.Contains(archetype);
     }
 
+
+#if DEBUG
+    public string GetEntityNameOrValue(ulong entity)
+    {
+        var parent = IdConverter.GetSecond(_world.FindRelationship<ChildOf, Wildcard>(entity));
+
+        if (!EntityHasName(entity, parent))
+            return entity.ToString();
+
+        return GetNameByEntity(entity, parent);
+    }
+
+    public string GetComponentNameOrValue(ulong component)
+    {
+        if (IdConverter.IsRelationship(component))
+        {
+            var first = _world.GetEntityFromIndex(IdConverter.GetFirst(component));
+            var second = _world.GetEntityFromIndex(IdConverter.GetSecond(component));
+
+            var firstName = GetComponentNameOrValue(first);
+            var secondName = GetComponentNameOrValue(second);
+
+            return string.Format("({0}, {1})", firstName, secondName);
+        }
+
+        var parent = IdConverter.GetSecond(_world.FindRelationship<ChildOf, Wildcard>(component));
+
+        if (TypeData.TypesByIndices.TryGetValue(component, out var type))
+            return type.Name;
+
+        if (!EntityHasName(component, parent))
+            return component.ToString();
+
+        return GetNameByEntity(component, parent);
+    }
+#endif
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void AddPool<T>(ulong component) where T : struct
     {
@@ -1345,10 +1394,10 @@ public sealed class Archetypes
     {
         foreach (var component in arhetype.components)
         {
-          TryCallOnComponentRemoveSystemsWithSingleComponent(
-              record.entity,
-              arhetype,
-              component);
+            TryCallOnComponentRemoveSystemsWithSingleComponent(
+                record.entity,
+                arhetype,
+                component);
 
             if (!_poolsByComponents.TryGetValue(component, out var pool))
                 continue;
@@ -1372,17 +1421,17 @@ public sealed class Archetypes
         }
         if (record.IsTag())
         {
-            RemoveComponentsFromEntities(record.entity, true);
+            RemoveComponentsFromEntities(record.entity);
         }
         if (record.IsRelation())
         {
             var component = IdConverter.Compose(IdConverter.GetFirst(record.entity), wildCard32, true);
-            RemoveComponentsFromEntities(component, IsDataRelationship(component));
+            RemoveComponentsFromEntities(component);
         }
         if (record.IsTarget())
         {
             var component = IdConverter.Compose(wildCard32, IdConverter.GetFirst(record.entity), true);
-            RemoveComponentsFromEntities(component, IsDataRelationship(component));
+            RemoveComponentsFromEntities(component);
         }
 
         TryRemoveFiltersWithTag(ref record);
@@ -1417,7 +1466,7 @@ public sealed class Archetypes
         _archetypesByTypes.Remove(record.entity);
     }
 
-    private void RemoveComponentsFromEntities(ulong component, bool reuseTable)
+    private void RemoveComponentsFromEntities(ulong component)
     {
         foreach (var archetype in _archetypesByTypes[component])
         {
@@ -1520,6 +1569,59 @@ public sealed class Archetypes
         return entity;
     }
 
+    public ref T AddDataRelationship<T>(Entity entity, Entity relation, Entity target) where T : struct
+    {
+        ref var relationRecord = ref _entityRecords[IdConverter.GetFirst(relation)];
+        ref var targetRecord = ref _entityRecords[IdConverter.GetFirst(target)];
+        ref var entityRecord = ref _entityRecords[IdConverter.GetFirst(entity)];
+
+        relationRecord.SetIsRelation(true);
+        targetRecord.SetIsTarget(true);
+        entityRecord.SetHasRelationsips(true);
+
+        var relationship = GetRelationship(relation, target);
+        bool hadRedundantRelationship = false;
+
+        if (_locked)
+        {
+            if (HasComponent(relationship, entity))
+            {
+#if DEBUG
+                var entityName = GetEntityNameOrValue(entity);
+                var componentName = GetComponentNameOrValue(relationship);
+                throw new Exception($"Entity {entityName} already has component {componentName}.");
+#else
+                var oldArchetype = (Archetype?)_archetypes[entityRecord.archetypeId].Target!;
+                var oldStorage = oldArchetype.GetStorage<T>(relationship);
+                return ref oldStorage[entityRecord.tableRow];
+#endif
+            }
+
+            hadRedundantRelationship = HasRelationship(entity, relation, wildCardRelationship);
+
+            if (relationRecord.IsExclusive() && hadRedundantRelationship)
+            {
+                var redundantRelationship = _world.FindRelationship(entity, relation, wildCardRelationship, relationship);
+                AddArchetypeOperation(entity, redundantRelationship, ArchetypeOperationType.RemoveComponent);
+            }
+
+            return ref AddArchetypeOperation<T>(entity, relationship, ArchetypeOperationType.AddComponent);
+        }
+
+        hadRedundantRelationship = HasRelationship(entity, relation, wildCardRelationship);
+        AddComponent(relationship, entity, out var archetype, out var newTableRow, false);
+
+        if (relationRecord.IsExclusive() && hadRedundantRelationship)
+        {
+            var redundantRelationship = _world.FindRelationship(entity, relation, wildCardRelationship, relationship);
+            RemoveComponent(redundantRelationship, entity, out _, out _, IsDataComponent(redundantRelationship));
+        }
+
+        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!, relationship);
+        var storage = archetype.GetStorage<T>(relationship);
+        return ref storage[newTableRow];
+    }
+
     public void AddRelationship(Entity entity, Entity relation, Entity target)
     {
         ref var relationRecord = ref _entityRecords[IdConverter.GetFirst(relation)];
@@ -1531,6 +1633,7 @@ public sealed class Archetypes
         entityRecord.SetHasRelationsips(true);
 
         var relationship = GetRelationship(relation, target);
+        bool hadRedundantRelationship = false;
 
         TypeData.Tags.Add(relationship);
 
@@ -1547,11 +1650,27 @@ public sealed class Archetypes
 #endif
             }
 
+            hadRedundantRelationship = HasRelationship(entity, relation, wildCardRelationship);
             AddArchetypeOperation(entity, relationship, ArchetypeOperationType.AddComponent);
+
+            if (relationRecord.IsExclusive() && hadRedundantRelationship)
+            {
+                var redundantRelationship = _world.FindRelationship(entity, relation, wildCardRelationship, relationship);
+                AddArchetypeOperation(entity, redundantRelationship, ArchetypeOperationType.RemoveComponent);
+            }
+
             return;
         }
 
+        hadRedundantRelationship = HasRelationship(entity, relation, wildCardRelationship);
         AddComponent(relationship, entity, out _, out _, true);
+
+        if (relationRecord.IsExclusive() && hadRedundantRelationship)
+        {
+            var redundantRelationship = _world.FindRelationship(entity, relation, wildCardRelationship, relationship);
+            RemoveComponent(redundantRelationship, entity, out _, out _, IsDataComponent(redundantRelationship));
+        }
+
         TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!, relationship);
     }
 
@@ -1597,42 +1716,6 @@ public sealed class Archetypes
         var relationId = IdConverter.GetFirst(relation);
         var targetId = IdConverter.GetFirst(target);
         return IdConverter.Compose(relationId, targetId, true);
-    }
-
-    public ref T AddDataRelationship<T>(Entity entity, Entity relation, Entity target) where T : struct
-    {
-        ref var relationRecord = ref _entityRecords[IdConverter.GetFirst(relation)];
-        ref var targetRecord = ref _entityRecords[IdConverter.GetFirst(target)];
-        ref var entityRecord = ref _entityRecords[IdConverter.GetFirst(entity)];
-
-        relationRecord.SetIsRelation(true);
-        targetRecord.SetIsTarget(true);
-        entityRecord.SetHasRelationsips(true);
-
-        var relationship = GetRelationship(relation, target);
-
-        if (_locked)
-        {
-            if (HasComponent(relationship, entity))
-            {
-#if DEBUG
-                var entityName = GetEntityNameOrValue(entity);
-                var componentName = GetComponentNameOrValue(relationship);
-                throw new Exception($"Entity {entityName} already has component {componentName}.");
-#else
-                var oldArchetype = (Archetype?)_archetypes[entityRecord.archetypeId].Target!;
-                var oldStorage = oldArchetype.GetStorage<T>(relationship);
-                return ref oldStorage[entityRecord.tableRow];
-#endif
-            }
-
-            return ref AddArchetypeOperation<T>(entity, relationship, ArchetypeOperationType.AddComponent);
-        }
-
-        AddComponent(relationship, entity, out var archetype, out var newTableRow, false);
-        TryCallOnComponentAddSystems(entity, (Archetype?)_archetypes[entityRecord.archetypeId].Target!, relationship);
-        var storage = archetype.GetStorage<T>(relationship);
-        return ref storage[newTableRow];
     }
 
     public void RemoveDataRelationship(Entity entity, Entity relation, Entity target)
@@ -2098,48 +2181,8 @@ public sealed class Archetypes
     {
         foreach (var system in systems)
         {
-            switch (system)
-            {
-                case OnComponentActionSystem onComponentActionSystem:
-                    _onComponentSystems.Add(onComponentActionSystem);
-                    break;
-            }
+            if (system is OnComponentActionSystem onComponentActionSystem)
+                _onComponentSystems.Add(onComponentActionSystem);
         }
     }
-
-#if DEBUG
-    private string GetEntityNameOrValue(ulong entity)
-    {
-        var parent = IdConverter.GetSecond(_world.FindRelationship<ChildOf, Wildcard>(entity));
-
-        if (!EntityHasName(entity, parent))
-            return entity.ToString();
-
-        return GetNameByEntity(entity, parent);
-    }
-
-    private string GetComponentNameOrValue(ulong component)
-    {
-        if (IdConverter.IsRelationship(component))
-        {
-            var first = _world.GetEntityFromIndex(IdConverter.GetFirst(component));
-            var second = _world.GetEntityFromIndex(IdConverter.GetSecond(component));
-
-            var firstName = GetComponentNameOrValue(first);
-            var secondName = GetComponentNameOrValue(second);
-
-            return string.Format("({0}, {1})", firstName, secondName);
-        }
-
-        var parent = IdConverter.GetSecond(_world.FindRelationship<ChildOf, Wildcard>(component));
-
-        if (TypeData.TypesByIndices.TryGetValue(component, out var type))
-            return type.Name;
-
-        if (!EntityHasName(component, parent))
-            return component.ToString();
-
-        return GetNameByEntity(component, parent);
-    }
-#endif
 }

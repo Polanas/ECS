@@ -232,6 +232,16 @@ public static class EntityExtensions
         return entity;
     }
 
+    /// <summary>
+    /// This method assumes that both T1 and T2 don't contain any data
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Entity Add<T1, T2>(this Entity entity) where T1 : struct where T2 : struct
+    {
+       entity.world.AddRelationship<T1, T2>(entity);
+        return entity;
+    }
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Entity Add<T1, T2>(this Entity entity, T1 value = default) where T1 : struct where T2 : struct
     {
