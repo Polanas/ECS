@@ -32,7 +32,7 @@ bool alive = entity.IsAlive();
 entity.Remove();
 ```
 ### Components
-> Note: if all components are deleted from an entity, the entity itself will de deleted.
+> Note: if all components are deleted from an entity, the entity itself will be deleted.
 ```cs
 //components are represented as structs.
 struct Velocity { public float x, y; }
@@ -45,8 +45,8 @@ var entity = world.AddEntity();
 entity.Add(new Velocity { x = 5, y = 5 });
 
 //getting a component by reference
-ref var velocity = ref entity.Get<Velocity>();
-velocity.x++;
+var velocity = entity.Get<Velocity>();
+velocity.Value.x++;
 
 //does this entity have Velocity?
 bool hasVelocity = entity.Has<Velocity>();
@@ -147,8 +147,11 @@ var relationWithPlayerFilter = world.Filter().All<Wildcard>(world.GetEntity("pla
 ```
 #### Getting Data From Relationships
 ```cs
-//use Pair1 to get data from the first part, and Pair2 for the second part
-var filter = world.Filter<Pair2<Begin, Position>, Pair2<Owes, Apples>>().Build();
+//use TermN() to specify which relationships correspond to each value
+var filter = world.Filter<Position, Owes>()
+    .Term1().First<Begin>()
+    .Term2().Second<Apples>()
+    .Build();
 
 foreach (var entry in filter)
 {
@@ -158,7 +161,6 @@ foreach (var entry in filter)
 ```
 ### Systems
 Systems run all the logic; they are represented as classes which can implement a bunch of interfaces (IUpdateSystem, IPostUpdateSystem, IInitSystem, IPreInitSystem, IDestroySystem).
-Also, systems can subscribe to adding and removing of component(s) via inheritance from OnComponentActionSystem class.
 ```cs
 //systems are classes
 class MoveSystem : IInitSystem, IUpdateSystem
@@ -210,6 +212,28 @@ systems
 
 //now gameLoop group is active
 _serviceSystems.SetGroupState("gameLoop", true);
+```
+#### OnComponentAction Systems
+These systems subscribe to addition and removal of certain components.
+```cs
+class OnComponentSystemTest : OnComponentActionSystem
+{
+    public OnComponentSystemTest()
+    {
+        //you can also use None() and Any() here
+        All<Position>();
+    }
+
+    public override void OnComponentAdd(Entity entity)
+    {
+        Console.WriteLine($"Position component was added to {entity}!");
+    }
+
+    public override void OnComponentRemove(Entity entity)
+    {
+        Console.WriteLine($"Position component was removed to {entity}!");
+    }
+}
 ```
 #### Shared Data
 A single instance of an object can be stored in a world to be accessed later.
