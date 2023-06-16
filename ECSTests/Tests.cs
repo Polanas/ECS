@@ -1,4 +1,5 @@
 using ECS;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECSTests;
 
@@ -914,5 +915,35 @@ public class UnitTests
 
         Assert.IsTrue(hasGreenColor);
         Assert.IsFalse(hasBLueColor);
+    }
+
+    [TestMethod]
+    public void WildcardDataFilterTest()
+    {
+        int expected = 6;
+        int actual = 0;
+
+        var c1 = _world.AddEntity();
+        var c2 = _world.AddEntity();
+
+        var e1 = _world.AddEntity().Add<Likes, Position>(new Position() { x = 1, y = 1 });
+        var e2 = _world.AddEntity().Add<Hates, Position>(new Position() { x = 2, y = 2 });
+
+        var filter = _world.Filter<Position>()
+            .Term1().First<Wildcard>()
+            .Build();
+
+        foreach (var entry in filter)
+        {
+            actual += entry.item.x + entry.item.y;
+        }
+
+        e1.Remove();
+        e2.Remove();
+
+        c1.Remove();
+        c2.Remove();
+
+        Assert.AreEqual(expected, actual);
     }
 }

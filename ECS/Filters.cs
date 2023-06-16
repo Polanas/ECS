@@ -437,7 +437,7 @@ public struct Enumerator<C> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage = archetype.GetStorage<C>(_terms[0]);
+        _storage = archetype.GetStorage<C>(GetCorrectTerm(_terms[0], archetype));
         _entityStorage = archetype.Entities;
     }
 
@@ -483,6 +483,20 @@ public struct Enumerator<C> : IDisposable
             item = ref _storage[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2> : IDisposable
@@ -517,8 +531,8 @@ public struct Enumerator<C1, C2> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
         _entityStorage = archetype.Entities;
     }
 
@@ -565,6 +579,20 @@ public struct Enumerator<C1, C2> : IDisposable
             item2 = ref _storage2[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3> : IDisposable
@@ -601,9 +629,9 @@ public struct Enumerator<C1, C2, C3> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
         _entityStorage = archetype.Entities;
     }
 
@@ -651,6 +679,20 @@ public struct Enumerator<C1, C2, C3> : IDisposable
             item3 = ref _storage3[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3, C4> : IDisposable
@@ -689,10 +731,10 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
-        _storage4 = archetype.GetStorage<C4>(_terms[3]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -741,6 +783,20 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
             item4 = ref _storage4[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
@@ -781,11 +837,11 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
-        _storage4 = archetype.GetStorage<C4>(_terms[3]);
-        _storage5 = archetype.GetStorage<C5>(_terms[4]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
+        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -835,6 +891,20 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
             item5 = ref _storage5[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
@@ -877,12 +947,12 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
-        _storage4 = archetype.GetStorage<C4>(_terms[3]);
-        _storage5 = archetype.GetStorage<C5>(_terms[4]);
-        _storage6 = archetype.GetStorage<C6>(_terms[5]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
+        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
+        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -933,6 +1003,20 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
             item6 = ref _storage6[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
@@ -976,13 +1060,13 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
-        _storage4 = archetype.GetStorage<C4>(_terms[3]);
-        _storage5 = archetype.GetStorage<C5>(_terms[4]);
-        _storage6 = archetype.GetStorage<C6>(_terms[5]);
-        _storage7 = archetype.GetStorage<C7>(_terms[6]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
+        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
+        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
+        _storage7 = archetype.GetStorage<C7>(GetCorrectTerm(_terms[6], archetype));
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1034,6 +1118,20 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
             item7 = ref _storage7[_entityIndex]
         };
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
+    }
 }
 
 public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
@@ -1080,14 +1178,14 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(_terms[0]);
-        _storage2 = archetype.GetStorage<C2>(_terms[1]);
-        _storage3 = archetype.GetStorage<C3>(_terms[2]);
-        _storage4 = archetype.GetStorage<C4>(_terms[3]);
-        _storage5 = archetype.GetStorage<C5>(_terms[4]);
-        _storage6 = archetype.GetStorage<C6>(_terms[5]);
-        _storage7 = archetype.GetStorage<C7>(_terms[6]);
-        _storage8 = archetype.GetStorage<C8>(_terms[7]);
+        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
+        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
+        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
+        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
+        _storage7 = archetype.GetStorage<C7>(GetCorrectTerm(_terms[6], archetype));
+        _storage8 = archetype.GetStorage<C8>(GetCorrectTerm(_terms[7], archetype));
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1139,5 +1237,19 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
             item7 = ref _storage7[_entityIndex],
             item8 = ref _storage8[_entityIndex]
         };
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong GetCorrectTerm(ulong term, Archetype archetype)
+    {
+        var correctTerm = term;
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+
+        return correctTerm;
     }
 }

@@ -754,6 +754,26 @@ public sealed class Archetypes
         }
     }
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong FindRelationship(Archetype archetype, ulong relationship, bool relationIsWildcard)
+    {
+        if (relationIsWildcard)
+        {
+            var targetToFind = IdConverter.GetSecond(relationship);
+            foreach (var component in archetype.componentsArray)
+                if (IdConverter.GetSecond(relationship) == targetToFind)
+                    return component;
+        }
+
+        var relationToFind = IdConverter.GetFirst(relationship);
+        foreach (var component in archetype.componentsArray)
+            if (IdConverter.GetFirst(relationship) == relationToFind)
+                return component;
+
+        return 0;
+    }
+
     public EnumeratorSingleGetter<T> GetEvents<T>() where T : struct
     {
         var typeIndex = GetComponentIndex<T>();
@@ -1085,7 +1105,7 @@ public sealed class Archetypes
         var newFilterRef = new WeakReference(newFilter);
         filterRefsList.Add(newFilterRef);
 
-        TryAddFilterWithTargets(newFilter);
+        TryAddFilterWiTags(newFilter);
 
         return newFilter;
     }
@@ -1323,7 +1343,7 @@ public sealed class Archetypes
         Pools<T>.Pool = pool;
     }
 
-    private void TryAddFilterWithTargets(Filter filter)
+    private void TryAddFilterWiTags(Filter filter)
     {
         var mask = filter.Mask;
 
@@ -1356,8 +1376,12 @@ public sealed class Archetypes
         }
     }
 
+    //TODO: wtf is this?
     private bool ComponentMightBeEntity(ulong component)
     {
+        if (IdConverter.GetFirst(component) == wildCard32)
+            return false;
+
         return !HasComponent(componentType, component);
     }
 
