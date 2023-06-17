@@ -78,12 +78,8 @@ public sealed class Table
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Add(Entity entity)
     {
-        if (_components.Count == 1 && _components.First() == 0)
-        {
-
-        }
-        _entites[Count] = entity;
         EnsureCapacity(Count + 1);
+        _entites[Count] = entity;
         return Count++;
     }
 
@@ -91,10 +87,6 @@ public sealed class Table
     public void Remove(int row)
     {
         Count--;
-        if (Count < 0)
-        {
-
-        }
 
         if (row >= Count)
             return;
