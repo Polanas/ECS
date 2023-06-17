@@ -477,11 +477,17 @@ public struct Enumerator<C> : IDisposable
     public Entry<C> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item = ref _storage[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item = ref _storage[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -571,12 +577,18 @@ public struct Enumerator<C1, C2> : IDisposable
     public Entry<C1, C2> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -670,13 +682,19 @@ public struct Enumerator<C1, C2, C3> : IDisposable
     public Entry<C1, C2, C3> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -773,14 +791,20 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
     public Entry<C1, C2, C3, C4> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex],
-            item4 = ref _storage4[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+                item4 = ref _storage4[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -880,15 +904,21 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
     public Entry<C1, C2, C3, C4, C5> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex],
-            item4 = ref _storage4[_entityIndex],
-            item5 = ref _storage5[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+                item4 = ref _storage4[record.tableRow],
+                item5 = ref _storage5[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -991,16 +1021,22 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
     public Entry<C1, C2, C3, C4, C5, C6> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex],
-            item4 = ref _storage4[_entityIndex],
-            item5 = ref _storage5[_entityIndex],
-            item6 = ref _storage6[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+                item4 = ref _storage4[record.tableRow],
+                item5 = ref _storage5[record.tableRow],
+                item6 = ref _storage6[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1105,17 +1141,23 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
     public Entry<C1, C2, C3, C4, C5, C6, C7> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex],
-            item4 = ref _storage4[_entityIndex],
-            item5 = ref _storage5[_entityIndex],
-            item6 = ref _storage6[_entityIndex],
-            item7 = ref _storage7[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+                item4 = ref _storage4[record.tableRow],
+                item5 = ref _storage5[record.tableRow],
+                item6 = ref _storage6[record.tableRow],
+                item7 = ref _storage7[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1224,18 +1266,24 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
     public Entry<C1, C2, C3, C4, C5, C6, C7, C8> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new()
+        get
         {
-            entity = new Entity(_entityStorage[_entityIndex], _world),
-            item1 = ref _storage1[_entityIndex],
-            item2 = ref _storage2[_entityIndex],
-            item3 = ref _storage3[_entityIndex],
-            item4 = ref _storage4[_entityIndex],
-            item5 = ref _storage5[_entityIndex],
-            item6 = ref _storage6[_entityIndex],
-            item7 = ref _storage7[_entityIndex],
-            item8 = ref _storage8[_entityIndex]
-        };
+            var entity = _entityStorage[_entityIndex];
+            ref var record = ref _archetypes.GetEntityRecord(entity);
+
+            return new()
+            {
+                entity = new Entity(entity, _world),
+                item1 = ref _storage1[record.tableRow],
+                item2 = ref _storage2[record.tableRow],
+                item3 = ref _storage3[record.tableRow],
+                item4 = ref _storage4[record.tableRow],
+                item5 = ref _storage5[record.tableRow],
+                item6 = ref _storage6[record.tableRow],
+                item7 = ref _storage7[record.tableRow],
+                item8 = ref _storage8[record.tableRow],
+            };
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

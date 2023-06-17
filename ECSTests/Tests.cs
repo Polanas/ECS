@@ -975,4 +975,26 @@ public class UnitTests
 
         Assert.AreEqual(expected, actual);
     }
+
+    [TestMethod]
+    public void MyTestMethod()
+    {
+        int expected = 2;
+        int actual = 0;
+
+        var e = _world.AddEntity().Add<Position>(new() { x = 2, y = 2 });
+        var e1 = _world.AddEntity().Add<Tag>().Add<Position>(new() { x = 1, y = 1 });
+
+        var tagFilter = _world.Filter<Position>().All<Tag>().Build();
+
+        foreach (var entry in tagFilter)
+        {
+            actual += entry.item.x + entry.item.y;
+        }
+
+        e.Remove();
+        e1.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
 }
