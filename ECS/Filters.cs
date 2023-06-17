@@ -530,7 +530,6 @@ public struct Enumerator<C1, C2> : IDisposable
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
-
         _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
         _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
         _entityStorage = archetype.Entities;

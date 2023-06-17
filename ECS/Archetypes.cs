@@ -683,7 +683,7 @@ public sealed class Archetypes
 
         Type type = null!;
 
-        var fakeInstace = default(T);
+        var fakeInstance = default(T);
 
         if (_locked)
         {
@@ -707,7 +707,7 @@ public sealed class Archetypes
 
             ref var item1 = ref AddArchetypeOperation<T>(entity, GetComponentIndex<T>(), ArchetypeOperationType.AddComponent);
 
-            if (Pools<T>.Pool == null && fakeInstace is IAutoReset<T>)
+            if (Pools<T>.Pool == null && fakeInstance is IAutoReset<T>)
                 AddPool<T>(typeIndex);
 
             item1 = value;
@@ -720,13 +720,13 @@ public sealed class Archetypes
 
         if (isNewArchetypeNull &&
             Pools<T>.Pool == null &&
-            fakeInstace is IAutoReset<T>)
+            fakeInstance is IAutoReset<T>)
         {
             AddPool<T>(typeIndex);
         }
 
         ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
-        item = fakeInstace;
+        item = fakeInstance;
         item = value;
         Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnAdd);
 
@@ -1116,10 +1116,10 @@ public sealed class Archetypes
         var secondValue = IdConverter.GetSecond(relationship);
         ulong finalComponentEntity;
 
-        var firstComponentEntity = IdConverter.Compose(firstValue, uint.MaxValue, false);
+        var firstComponentEntity = IdConverter.Compose(firstValue, uint.MaxValue - 1, false);
         var finalValue = HasComponent(componentType, firstComponentEntity) && GetComponent<Component>(componentType, firstComponentEntity).size > 1
             ? firstValue : secondValue;
-        finalComponentEntity = IdConverter.Compose(finalValue, uint.MaxValue, false);
+        finalComponentEntity = IdConverter.Compose(finalValue, uint.MaxValue - 1, false);
         return TypeData.TypesByIndices[finalComponentEntity];
     }
 
@@ -1131,8 +1131,8 @@ public sealed class Archetypes
         var firstValue = IdConverter.GetFirst(relationship);
         var secondValue = IdConverter.GetSecond(relationship);
 
-        var firstComponentEntity = IdConverter.Compose(firstValue, uint.MaxValue, false);
-        var secondComponentEntity = IdConverter.Compose(secondValue, uint.MaxValue, false);
+        var firstComponentEntity = IdConverter.Compose(firstValue, uint.MaxValue - 1, false);
+        var secondComponentEntity = IdConverter.Compose(secondValue, uint.MaxValue - 1, false);
 
         bool firstHasData = firstValue != wildCard32 && HasComponent(componentType, firstComponentEntity) && GetComponent<Component>(componentType, firstComponentEntity).size > 1;
         bool secondHasData = secondValue != wildCard31 && HasComponent(componentType, secondComponentEntity) && GetComponent<Component>(componentType, secondComponentEntity).size > 1;
@@ -1207,30 +1207,31 @@ public sealed class Archetypes
     public bool IsDataComponent(ulong component) =>
             !TypeData.Tags.Contains(component) || IsDataRelationship(component);
 
-    /// <param name="redundantType">Specifies what relation and entity shouldn't be copied, meaning every eventIndex with specified relation or entity won't be copied)</param>
-    public void CopyEntityComponents(Entity entityCopy, Entity entiyToCopy, bool copyChildren = false, ulong redundantType = 0)
+    /// <param name="skipType">Specifies what relation and entity shouldn't be copied, meaning every eventIndex with specified relation or entity won't be copied)</param>
+    public void CopyEntityComponents(Entity entity, Entity instance, bool copyChildren = false, ulong skipType = 0)
     {
-        var toCopyArchetype = GetArchetype(entiyToCopy);
+        var instanceArchetype = GetArchetype(instance);
 
-        ref var instanceRecord = ref _entityRecords[IdConverter.GetFirst(entityCopy)];
+        ref var instanceRecord = ref _entityRecords[IdConverter.GetFirst(instance)];
+        ref var entityRecord = ref _entityRecords[IdConverter.GetFirst(entity)];
         var instanceRow = instanceRecord.tableRow;
 
-        var redundantFirst = IdConverter.GetFirst(redundantType);
-        var redundantSecond = IdConverter.GetSecond(redundantType);
+        var skipFirst = IdConverter.GetFirst(skipType);
+        var skipSecond = IdConverter.GetSecond(skipType);
 
         Array entityStorage, instanceStorage;
         int entityRow;
         ulong prefabType = GetComponentIndex<Prefab>();
 
-        foreach (var type in toCopyArchetype.components)
+        foreach (var type in instanceArchetype.components)
         {
-            if (HasComponent(type, ref instanceRecord) || type == prefabType)
+            if (HasComponent(type, ref entityRecord) || type == prefabType)
                 continue;
 
             var currentFirst = IdConverter.GetFirst(type);
             var currentSecond = IdConverter.GetSecond(type);
 
-            if (redundantFirst == currentFirst || redundantSecond == currentSecond)
+            if (skipFirst == currentFirst || skipSecond == currentSecond)
                 continue;
 
             ref var componentRecord = ref _entityRecords[currentFirst];
@@ -1241,28 +1242,28 @@ public sealed class Archetypes
             {
                 if (reuseTable)
                 {
-                    AddArchetypeOperation(entityCopy, type, ArchetypeOperationType.AddComponent);
+                    AddArchetypeOperation(entity, type, ArchetypeOperationType.AddComponent);
                     continue;
                 }
 
-                entityStorage = AddArchetypeOperation(entityCopy, type, ArchetypeOperationType.AddComponent, out entityRow);
-                instanceStorage = toCopyArchetype.Table.GetStorage(type);
+                entityStorage = AddArchetypeOperation(entity, type, ArchetypeOperationType.AddComponent, out entityRow);
+                instanceStorage = instanceArchetype.Table.GetStorage(type);
                 Array.Copy(instanceStorage, instanceRow, entityStorage, entityRow, 1);
 
                 continue;
             }
-            AddComponent(type, entityCopy, out var newEntityArchetype, out entityRow, reuseTable);
+            AddComponent(type, entity, out var newEntityArchetype, out entityRow, reuseTable);
 
             if (reuseTable)
                 continue;
 
             entityStorage = newEntityArchetype.Table.GetStorage(type);
-            instanceStorage = toCopyArchetype.Table.GetStorage(type);
+            instanceStorage = instanceArchetype.Table.GetStorage(type);
             Array.Copy(instanceStorage, instanceRow, entityStorage, entityRow, 1);
         }
 
         if (copyChildren)
-            TryAddInstanceOfChildren(entityCopy, entiyToCopy);
+            TryAddInstanceOfChildren(entity, instance);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1577,7 +1578,7 @@ public sealed class Archetypes
     private Entity AddComponentEntity(Type type = null!)
     {
         var entityValue = GetNewEntity(false);
-        IdConverter.SetSecond(ref entityValue, uint.MaxValue);
+        IdConverter.SetSecond(ref entityValue, uint.MaxValue - 1);
         var entity = new Entity(entityValue, _world);
         var archetypeRef = _archetypes[0];
         var archetype = ((Archetype?)archetypeRef.Target)!;

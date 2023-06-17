@@ -337,8 +337,8 @@ public sealed class ECSWorld
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddInstanceOf(Entity entity, Entity instace) =>
-        _archetypes.AddInstanceOf(entity, instace);
+    public void AddInstanceOf(Entity entity, Entity instance) =>
+        _archetypes.AddInstanceOf(entity, instance);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RemoveEntity(Entity entity) => _archetypes.RemoveEntity(entity);

@@ -170,6 +170,7 @@ public readonly struct FilterBuilder<C>
         mask = MaskPool.Get();
         listMask = ListMaskPool.Get();
 
+        None<Prefab>();
         All<C>();
     }
 
@@ -345,6 +346,7 @@ public readonly struct FilterBuilder<C1, C2>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2> All<T>()
@@ -499,6 +501,7 @@ public readonly struct FilterBuilder<C1, C2, C3>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3> All<T>()
@@ -659,6 +662,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>().All<C4>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3, C4> All<T>()
@@ -825,6 +829,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>().All<C4>().All<C5>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5> All<T>()
@@ -997,6 +1002,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>().All<C4>().All<C5>().All<C6>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5, C6> All<T>()
@@ -1175,6 +1181,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>().All<C4>().All<C5>().All<C6>().All<C7>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5, C6, C7> All<T>()
@@ -1359,6 +1366,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8>
         listMask = ListMaskPool.Get();
 
         All<C1>().All<C2>().All<C3>().All<C4>().All<C5>().All<C6>().All<C7>().All<C8>();
+        None<Prefab>();
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8> All<T>()

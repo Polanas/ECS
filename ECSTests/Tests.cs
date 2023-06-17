@@ -537,6 +537,35 @@ public class UnitTests
     }
 
     [TestMethod]
+    public void PrefabFilterTest()
+    {
+        int expected = 4;
+        int actual = 0;
+
+        var prefab = _world.AddPrefab();
+        prefab.Add(new Position { x = 1, y = 1 });
+        prefab.Add<Likes, Apples>();
+
+        var instanceOne = _world.AddEntity().InstanceOf(prefab);
+        var instanceTwo = _world.AddEntity().InstanceOf(prefab);
+
+        var filter = _world.Filter<Position>().All<Likes, Apples>().Build();
+
+        var pos = instanceOne.Get<Position>().Value;
+
+        foreach (var entry in filter)
+        {
+            actual += entry.Item.x + entry.item.y;
+        }
+
+        instanceOne.Remove();
+        instanceTwo.Remove();
+        prefab.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
     public void FilterAnyTest()
     {
         int extected = 3;
