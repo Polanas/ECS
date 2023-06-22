@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace ECS;
 
@@ -46,7 +46,13 @@ public interface ICustomDataInject
 
 public struct SharedInject<T> : IDataInject where T : class
 {
-    public T Instance { get; private set; }
+    public T Instance
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private set;
+    }
 
     public void Fill(ECSSystems systems)
     {
@@ -56,7 +62,13 @@ public struct SharedInject<T> : IDataInject where T : class
 
 public struct CustomInject<T> : ICustomDataInject where T : class
 {
-    public T Instance { get; private set; }
+    public T Instance
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private set;
+    }
 
     public void Fill(object[] injects)
     {
@@ -99,7 +111,7 @@ public abstract class OnComponentActionSystem : IOnComponentActionSystem, ISyste
         anyComponentsHashset = new();
         allComponentsHashset = new();
     }
-    
+
     public virtual void OnComponentAdd(Entity entity) { }
     public virtual void OnComponentRemove(Entity entity) { }
 
