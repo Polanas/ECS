@@ -159,6 +159,27 @@ foreach (var entry in filter)
     ref var owesApples = ref entry.item2.GetValue();
 }
 ```
+#### Optional Components
+components can be marked optional, which will include entites with and without these components.
+
+```cs
+var filter = world.Flter<Position, Speed>
+    //mark Speed as optional
+    .Term2().Optional()
+    .Build();
+
+foreach (var entry in filter)
+{
+    Speed speed = default;
+
+    //check if current entity has Speed (it's faster than defualt HasComponent check)
+    if (filter.HasOptional2())
+        speed = entry.item2;
+
+    entry.item1 += speed;
+}
+
+```
 ### Systems
 Systems run all the logic; they are represented as classes which can implement a bunch of interfaces (IUpdateSystem, IPostUpdateSystem, IInitSystem, IPreInitSystem, IDestroySystem).
 ```cs
