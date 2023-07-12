@@ -172,8 +172,8 @@ foreach (var entry in filter)
 {
     Speed speed = default;
 
-    //check if current entity has Speed (it's faster than defualt HasComponent check)
-    if (filter.HasOptional2())
+    //check if current entity has Speed
+    if (!entry.IsNull2())
         speed = entry.item2;
 
     entry.item1 += speed;
