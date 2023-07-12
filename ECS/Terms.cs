@@ -55,13 +55,20 @@ public readonly struct Term<C>
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
         return _filterBuilder;
     }
+
+    public FilterBuilder<C> Optional()
+    {
+        _filterBuilder.listMask.allTypes.Remove(_component);
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
+        return _filterBuilder;
+    }
 }
 
-public readonly struct Term<C1, C2>
+public struct Term<C1, C2>
     where C1 : struct
     where C2 : struct
 {
-    private readonly FilterBuilder<C1, C2> _filterBuilder;
+    private FilterBuilder<C1, C2> _filterBuilder;
     private readonly Archetypes _archetypes;
     private readonly ulong _component;
     private readonly int _componentIndex;
@@ -111,6 +118,12 @@ public readonly struct Term<C1, C2>
         var relationship = IdConverter.Compose(first, second, true);
 
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
+        return _filterBuilder;
+    }
+
+    public FilterBuilder<C1, C2> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
         return _filterBuilder;
     }
 }

@@ -53,6 +53,9 @@ public readonly struct Mask
     }
 }
 
+/// <summary>
+/// It's used alongsider regular masks, cause having lists off types is sometimes more convenient
+/// </summary>
 public readonly struct ListMask
 {
     public readonly List<ulong> allTypes;

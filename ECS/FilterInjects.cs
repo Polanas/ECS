@@ -140,7 +140,7 @@ public struct FilterInject : IDataInject
         return new Enumerator(value.Archetypes, value.archetypesList);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;
@@ -199,10 +199,10 @@ public struct FilterInject<C> : IDataInject
 
     public Enumerator<C> GetEnumerator()
     {
-        return new Enumerator<C>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;
@@ -262,10 +262,10 @@ public struct FilterInject<C1, C2> : IDataInject
 
     public Enumerator<C1, C2> GetEnumerator()
     {
-        return new Enumerator<C1, C2>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;
@@ -326,7 +326,7 @@ public struct FilterInject<C1, C2, C3> : IDataInject
 
     public Enumerator<C1, C2, C3> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
     private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
@@ -391,10 +391,10 @@ public struct FilterInject<C1, C2, C3, C4> : IDataInject
 
     public Enumerator<C1, C2, C3, C4> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3, C4>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;
@@ -457,7 +457,7 @@ public struct FilterInject<C1, C2, C3, C4, C5> : IDataInject
 
     public Enumerator<C1, C2, C3, C4, C5> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3, C4, C5>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
     private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
@@ -524,10 +524,10 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6> : IDataInject
 
     public Enumerator<C1, C2, C3, C4, C5, C6> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;
@@ -592,7 +592,7 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7> : IDataInject
 
     public Enumerator<C1, C2, C3, C4, C5, C6, C7> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6, C7>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6, C7>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
     private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
@@ -661,10 +661,10 @@ public struct FilterInject<C1, C2, C3, C4, C5, C6, C7, C8> : IDataInject
 
     public Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8>(value.Archetypes, value.archetypesList, value.terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8>(value.Archetypes, value.archetypesList, value.terms, value);
     }
 
-    private void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
+    private static void AddTypes(List<ulong>? types, SortedSet<ulong> maskTypes)
     {
         if (types is null)
             return;

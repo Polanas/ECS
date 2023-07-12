@@ -49,6 +49,12 @@ public sealed class Archetype
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TryGetStorage<T>(ulong type, out T[]? storage) where T : struct
+    {
+        return _table.TryGetStorage(type, out storage);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Array GetStorage(ulong type)
     {
         return _table.GetStorage(type);

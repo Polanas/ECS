@@ -493,9 +493,9 @@ public sealed class GroupSystem :
     private readonly IUpdateSystem[] _updateSystems = null!;
     private readonly IPostUpdateSystem[] _postUpdateSystems = null!;
     private readonly IGroupSystem[] _groupSystems = null!;
-    private int _updateSystemsCount;
-    private int _postUpdateSystemsCount;
-    private int _groupSystemsCount;
+    private readonly int _updateSystemsCount;
+    private readonly int _postUpdateSystemsCount;
+    private readonly int _groupSystemsCount;
     private bool _state;
 
     public GroupSystem(string name, bool defaultState, params ISystem[] systems)

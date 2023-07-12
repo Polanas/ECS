@@ -35,8 +35,8 @@ struct Likes { }
 
 struct MyRelation { }
 struct Color { }
-struct Green { int a; }
-struct Blue { int a; }
+struct Green { int value; }
+struct Blue { int value; }
 
 struct Size : IAutoReset<Size>
 {
@@ -977,24 +977,37 @@ public class UnitTests
     }
 
     [TestMethod]
-    public void MyTestMethod()
+    public void OpitonalComponentTest()
     {
-        int expected = 2;
-        int actual = 0;
+        float expected = 11;
+        float actual = 0;
 
-        var e = _world.AddEntity().Add<Position>(new() { x = 2, y = 2 });
-        var e1 = _world.AddEntity().Add<Tag>().Add<Position>(new() { x = 1, y = 1 });
+        var filter = _world.Filter<Position, Velocity>()
+            .Term1().Optional()
+            .Build();
 
-        var tagFilter = _world.Filter<Position>().All<Tag>().Build();
+        var e1 = _world.AddEntity()
+            .Add<Position>(new() { x = 1, y = 1 })
+            .Add<Velocity>(new() { x = 3, y = 2 });
 
-        foreach (var entry in tagFilter)
+        var e2 = _world.AddEntity()
+            .Add<Velocity>(new() { x = 2, y = 2 });
+
+        foreach (var entry in filter)
         {
-            actual += entry.item.x + entry.item.y;
+            if (filter.HasOptional1())
+            {
+                var position = entry.item1;
+                actual += position.x + position.y;
+            }
+
+            var velocity = entry.item2;
+            actual += velocity.x + velocity.y;
         }
 
-        e.Remove();
         e1.Remove();
-
+        e2.Remove();
+        
         Assert.AreEqual(expected, actual);
     }
 }

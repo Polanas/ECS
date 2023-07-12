@@ -4,27 +4,13 @@ namespace ECS;
 
 public delegate void ModifyPrefabValue<T>(ref T component, T value) where T : struct;
 
-public struct AdditionalEntityData
-{
-    private byte _data;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Set(byte type, bool value) => _data = (byte)(value ? _data | (1 << type) : _data & 1);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Get(byte type) => (_data & (1 << type)) > 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void Clear() => _data = 0;
-}
-
 public struct EntityRecord
 {
     public int archetypeRow;
     public int tableRow;
     public int archetypeId;
     public ulong entity;
-    public AdditionalEntityData additionalData;
+    public PackedBoolByte additionalData;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsTag() => additionalData.Get(0);
@@ -1061,11 +1047,29 @@ public sealed class Archetypes
 
     public Filter GetFilter(
         Mask mask,
-        Func<Archetypes, Mask, List<Archetype>, List<ulong>, Filter> createFilter,
+        ListMask? listMask,
+        Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter> createFilter,
+        PackedBoolInt optionalFlags,
         List<ulong> terms = null!)
     {
-        var hash = mask.GetHashCode();
+        List<ulong> typesToRemove = ListPool<ulong>.Get();
 
+        foreach (var type in mask.allTypes)
+        {
+            if (listMask == null)
+                break;
+            var typeIndex = listMask.Value.allTypes.IndexOf(type);
+
+            if (optionalFlags.Get(typeIndex))
+                typesToRemove.Add(type);
+        }
+
+        foreach (var type in typesToRemove)
+            mask.allTypes.Remove(type);
+
+        ListPool<ulong>.Add(typesToRemove);
+
+        var hash = mask.GetHashCode();
         if (_filtersByHash.TryGetValue(hash, out var filterRefsList))
         {
             foreach (var filterRef in filterRefsList)
@@ -1094,14 +1098,14 @@ public sealed class Archetypes
 
 #if DEBUG
         if (mask.allTypes.Count == 0 && mask.anyTypes.Count == 0)
-            throw new Exception("A filterRef can't have zero All and Any arguments");
+            throw new Exception("A filter can't have zero All and Any arguments");
 #endif
 
         var firstType = mask.allTypes.Count > 0 ? mask.allTypes.First() : mask.anyTypes.First();
         if (_archetypesByTypes.ContainsKey(firstType))
-            FindArchetypesCompatibleWith(mask, matchingArchetypes);
+            FindArchetypesCompatibleWith(mask, optionalFlags, matchingArchetypes);
 
-        var newFilter = createFilter(this, mask, matchingArchetypes, terms);
+        var newFilter = createFilter(this, mask, matchingArchetypes, terms, optionalFlags);
         var newFilterRef = new WeakReference(newFilter);
         filterRefsList.Add(newFilterRef);
 
@@ -1510,7 +1514,7 @@ public sealed class Archetypes
         }
     }
 
-    private ulong GetActualComponentId(Archetype archetype, ulong component)
+    private static ulong GetActualComponentId(Archetype archetype, ulong component)
     {
         var first = IdConverter.GetFirst(component);
         var second = IdConverter.GetSecond(component);
@@ -1784,7 +1788,7 @@ public sealed class Archetypes
         return storage.array;
     }
 
-    private void FindArchetypesCompatibleWith(Mask mask, List<Archetype> matchingArchetypes)
+    private void FindArchetypesCompatibleWith(Mask mask, PackedBoolInt optionalFlags, List<Archetype> matchingArchetypes)
     {
         var matchingWithAnyArchetypes = new HashSet<Archetype>();
 
@@ -1792,10 +1796,12 @@ public sealed class Archetypes
         {
             var archetypesWithFirstHasType = _archetypesByTypes[mask.allTypes.First()];
             foreach (var archetype in archetypesWithFirstHasType)
-                if (MaskCompatibleWith(mask, archetype))
+                if (MaskCompatibleWith(mask, archetype, optionalFlags))
                     matchingArchetypes.Add(archetype);
+
         }
 
+        int componentIndex = 0;
         foreach (var anyType in mask.anyTypes)
         {
             if (!_archetypesByTypes.TryGetValue(anyType, out var archetypesWithAnyType))
@@ -1803,6 +1809,8 @@ public sealed class Archetypes
 
             foreach (var archetypeWithAnyType in archetypesWithAnyType)
                 matchingWithAnyArchetypes.Add(archetypeWithAnyType);
+
+            componentIndex++;
         }
 
         foreach (var matchingArchetype in matchingWithAnyArchetypes)
@@ -1835,7 +1843,7 @@ public sealed class Archetypes
         return true;
     }
 
-    private bool MaskCompatibleWith(Mask mask, Archetype archetype)
+    private bool MaskCompatibleWith(Mask mask, Archetype archetype, PackedBoolInt optionalFlags)
     {
         if (mask.allTypes.Count > archetype.components.Count)
             return false;
@@ -1846,13 +1854,22 @@ public sealed class Archetypes
                 return false;
         }
 
+        if (mask.anyTypes.Count > 0 && !ArchetypeHasAnyType(archetype, mask.anyTypes))
+            return false;
+
+        int componentIndex = 0;
         foreach (var hasType in mask.allTypes)
         {
+            if (optionalFlags.Get(componentIndex))
+                continue;
+
             if (IdConverter.IsRelationship(hasType) && TypeCompatibleWith(archetype.components, hasType))
                 continue;
 
             if (!HasComponent(hasType, archetype))
                 return false;
+
+            componentIndex++;
         }
 
         return true;
@@ -1985,7 +2002,7 @@ public sealed class Archetypes
                 if (filterRef.Target is not Filter filter)
                     continue;
 
-                if (!MaskCompatibleWithAny(filter.Mask, archetype))
+                if (!MaskCompatibleWith(filter.Mask, archetype, filter.optionalFlags))
                     continue;
 
                 filter.AddArchetype(archetype);
@@ -1995,7 +2012,7 @@ public sealed class Archetypes
         return archetypeRef;
     }
 
-    private int GetArchetypeCapacity(SortedSet<ulong> types)
+    private static int GetArchetypeCapacity(SortedSet<ulong> types)
     {
         foreach (var type in types)
         {

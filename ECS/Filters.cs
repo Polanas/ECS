@@ -40,8 +40,12 @@ public class Filter
 
     private readonly Mask _mask;
 
-    public Filter(Archetypes archetypes, Mask mask, List<Archetype> archetypesList)
+    internal PackedBoolInt optionalFlags;
+    internal PackedBoolInt currentOptionalFlags;
+
+    public Filter(Archetypes archetypes, Mask mask, List<Archetype> archetypesList, PackedBoolInt optionalFlags)
     {
+        this.optionalFlags = optionalFlags;
         this.archetypesList = archetypesList;
         this.archetypes = archetypes;
         _mask = mask;
@@ -63,6 +67,26 @@ public class Filter
     {
         archetypesList.Add(archetype);
     }
+
+    public bool HasOptional1() => currentOptionalFlags.Get(0);
+
+    public bool HasOptional2() => currentOptionalFlags.Get(1);
+
+    public bool HasOptional3() => currentOptionalFlags.Get(2);
+
+    public bool HasOptional4() => currentOptionalFlags.Get(3);
+
+    public bool HasOptional5() => currentOptionalFlags.Get(4);
+
+    public bool HasOptional6() => currentOptionalFlags.Get(5);
+
+    public bool HasOptional7() => currentOptionalFlags.Get(6);
+
+    public bool HasOptional8() => currentOptionalFlags.Get(7);
+
+    internal void SetOptional(int type, bool value) => currentOptionalFlags.Set(type, value);
+
+    internal void ClearOptional() => currentOptionalFlags.Clear();
 
     public Enumerator GetEnumerator()
     {
@@ -94,14 +118,15 @@ public class Filter<C> : Filter
     public Filter(
        Archetypes archetypes,
        Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms) : base(archetypes, mask, archetypesList)
+       List<ulong> terms,
+       PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C> GetEnumerator()
     {
-        return new Enumerator<C>(archetypes, archetypesList, terms);
+        return new Enumerator<C>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -113,16 +138,16 @@ public class Filter<C1, C2> : Filter
 
     public Filter(
         Archetypes archetypes,
-        Mask mask,
-        List<Archetype> archetypesList,
-        List<ulong> terms) : base(archetypes, mask, archetypesList)
+        Mask mask, List<Archetype> archetypesList,
+        List<ulong> terms,
+        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2> GetEnumerator()
     {
-        return new Enumerator<C1, C2>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -136,14 +161,15 @@ public class Filter<C1, C2, C3> : Filter
     public Filter(
         Archetypes archetypes,
         Mask mask, List<Archetype> archetypesList,
-        List<ulong> terms) : base(archetypes, mask, archetypesList)
+        List<ulong> terms,
+        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -156,16 +182,17 @@ public class Filter<C1, C2, C3, C4> : Filter
     internal readonly ulong[] terms;
 
     public Filter(
-      Archetypes archetypes,
-      Mask mask, List<Archetype> archetypesList,
-      List<ulong> terms) : base(archetypes, mask, archetypesList)
+        Archetypes archetypes,
+        Mask mask, List<Archetype> archetypesList,
+        List<ulong> terms,
+        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3, C4> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3, C4>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -179,16 +206,17 @@ public class Filter<C1, C2, C3, C4, C5> : Filter
     internal readonly ulong[] terms;
 
     public Filter(
-      Archetypes archetypes,
-      Mask mask, List<Archetype> archetypesList,
-      List<ulong> terms) : base(archetypes, mask, archetypesList)
+       Archetypes archetypes,
+       Mask mask, List<Archetype> archetypesList,
+       List<ulong> terms,
+       PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3, C4, C5> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3, C4, C5>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -203,16 +231,17 @@ public class Filter<C1, C2, C3, C4, C5, C6> : Filter
     internal readonly ulong[] terms;
 
     public Filter(
-       Archetypes archetypes,
-       Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms) : base(archetypes, mask, archetypesList)
+      Archetypes archetypes,
+      Mask mask, List<Archetype> archetypesList,
+      List<ulong> terms,
+      PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -228,16 +257,17 @@ public class Filter<C1, C2, C3, C4, C5, C6, C7> : Filter
     internal readonly ulong[] terms;
 
     public Filter(
-       Archetypes archetypes,
-       Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms) : base(archetypes, mask, archetypesList)
+         Archetypes archetypes,
+         Mask mask, List<Archetype> archetypesList,
+         List<ulong> terms,
+         PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6, C7> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6, C7>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6, C7>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -254,16 +284,17 @@ public class Filter<C1, C2, C3, C4, C5, C6, C7, C8> : Filter
     internal readonly ulong[] terms;
 
     public Filter(
-       Archetypes archetypes,
-       Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms) : base(archetypes, mask, archetypesList)
+         Archetypes archetypes,
+         Mask mask, List<Archetype> archetypesList,
+         List<ulong> terms,
+         PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
     {
         this.terms = terms.ToArray();
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> GetEnumerator()
     {
-        return new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8>(archetypes, archetypesList, terms);
+        return new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8>(archetypes, archetypesList, terms, this);
     }
 }
 
@@ -413,13 +444,15 @@ public struct Enumerator<C> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C[] _storage = null!;
+    private C[]? _storage;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _archetypes = archetypes;
         _terms = terms;
@@ -437,7 +470,9 @@ public struct Enumerator<C> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage = archetype.GetStorage<C>(GetCorrectTerm(_terms[0], archetype));
+        _filter.ClearOptional();
+        TrySetStorageAndOptional(archetype, 0, ref _storage);
+
         _entityStorage = archetype.Entities;
     }
 
@@ -485,9 +520,16 @@ public struct Enumerator<C> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item = ref _storage[record.tableRow],
+                item = ref _storage == null ? ref ArraySingle<C>.value[0] : ref _storage[record.tableRow]
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -512,15 +554,17 @@ public struct Enumerator<C1, C2> : IDisposable
     private readonly List<Archetype> _archetypesList;
     private readonly Archetypes _archetypes;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private readonly ECSWorld _world;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
+    private C1[]? _storage1 = null!;
+    private C2[]? _storage2 = null!;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -536,8 +580,10 @@ public struct Enumerator<C1, C2> : IDisposable
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
+
+        _filter.ClearOptional();
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
         _entityStorage = archetype.Entities;
     }
 
@@ -585,10 +631,17 @@ public struct Enumerator<C1, C2> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -614,16 +667,18 @@ public struct Enumerator<C1, C2, C3> : IDisposable
     private readonly List<Archetype> _archetypesList;
     private readonly Archetypes _archetypes;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private readonly ECSWorld _world;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -640,9 +695,9 @@ public struct Enumerator<C1, C2, C3> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
         _entityStorage = archetype.Entities;
     }
 
@@ -690,11 +745,18 @@ public struct Enumerator<C1, C2, C3> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -722,16 +784,18 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
-    private C4[] _storage4 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
+    private C4[]? _storage4;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -748,10 +812,10 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
-        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 4, ref _storage4);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -799,12 +863,19 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
-                item4 = ref _storage4[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
+                item4 = ref _storage4 == null ? ref ArraySingle<C4>.value[0] : ref _storage4[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -833,17 +904,19 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
-    private C4[] _storage4 = null!;
-    private C5[] _storage5 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
+    private C4[]? _storage4;
+    private C5[]? _storage5;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -860,11 +933,11 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
-        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
-        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 4, ref _storage4);
+        TrySetStorageAndOptional(archetype, 5, ref _storage5);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -912,13 +985,20 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
-                item4 = ref _storage4[record.tableRow],
-                item5 = ref _storage5[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
+                item4 = ref _storage4 == null ? ref ArraySingle<C4>.value[0] : ref _storage4[record.tableRow],
+                item5 = ref _storage5 == null ? ref ArraySingle<C5>.value[0] : ref _storage5[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -948,18 +1028,20 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
-    private C4[] _storage4 = null!;
-    private C5[] _storage5 = null!;
-    private C6[] _storage6 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
+    private C4[]? _storage4;
+    private C5[]? _storage5;
+    private C6[]? _storage6;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -975,13 +1057,12 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
-
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
-        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
-        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
-        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 4, ref _storage4);
+        TrySetStorageAndOptional(archetype, 5, ref _storage5);
+        TrySetStorageAndOptional(archetype, 6, ref _storage6);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1029,14 +1110,21 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
-                item4 = ref _storage4[record.tableRow],
-                item5 = ref _storage5[record.tableRow],
-                item6 = ref _storage6[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
+                item4 = ref _storage4 == null ? ref ArraySingle<C4>.value[0] : ref _storage4[record.tableRow],
+                item5 = ref _storage5 == null ? ref ArraySingle<C5>.value[0] : ref _storage5[record.tableRow],
+                item6 = ref _storage6 == null ? ref ArraySingle<C6>.value[0] : ref _storage6[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1067,19 +1155,21 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
-    private C4[] _storage4 = null!;
-    private C5[] _storage5 = null!;
-    private C6[] _storage6 = null!;
-    private C7[] _storage7 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
+    private C4[]? _storage4;
+    private C5[]? _storage5;
+    private C6[]? _storage6;
+    private C7[]? _storage7;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _archetypes = archetypes;
         _terms = terms;
@@ -1095,13 +1185,13 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
-        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
-        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
-        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
-        _storage7 = archetype.GetStorage<C7>(GetCorrectTerm(_terms[6], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 4, ref _storage4);
+        TrySetStorageAndOptional(archetype, 5, ref _storage5);
+        TrySetStorageAndOptional(archetype, 6, ref _storage6);
+        TrySetStorageAndOptional(archetype, 7, ref _storage7);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1149,15 +1239,22 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
-                item4 = ref _storage4[record.tableRow],
-                item5 = ref _storage5[record.tableRow],
-                item6 = ref _storage6[record.tableRow],
-                item7 = ref _storage7[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
+                item4 = ref _storage4 == null ? ref ArraySingle<C4>.value[0] : ref _storage4[record.tableRow],
+                item5 = ref _storage5 == null ? ref ArraySingle<C5>.value[0] : ref _storage5[record.tableRow],
+                item6 = ref _storage6 == null ? ref ArraySingle<C6>.value[0] : ref _storage6[record.tableRow],
+                item7 = ref _storage7 == null ? ref ArraySingle<C7>.value[0] : ref _storage7[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1189,20 +1286,22 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
+    private readonly Filter _filter;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
-    private C1[] _storage1 = null!;
-    private C2[] _storage2 = null!;
-    private C3[] _storage3 = null!;
-    private C4[] _storage4 = null!;
-    private C5[] _storage5 = null!;
-    private C6[] _storage6 = null!;
-    private C7[] _storage7 = null!;
-    private C8[] _storage8 = null!;
+    private C1[]? _storage1;
+    private C2[]? _storage2;
+    private C3[]? _storage3;
+    private C4[]? _storage4;
+    private C5[]? _storage5;
+    private C6[]? _storage6;
+    private C7[]? _storage7;
+    private C8[]? _storage8;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms)
+    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
+        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -1219,14 +1318,14 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _storage1 = archetype.GetStorage<C1>(GetCorrectTerm(_terms[0], archetype));
-        _storage2 = archetype.GetStorage<C2>(GetCorrectTerm(_terms[1], archetype));
-        _storage3 = archetype.GetStorage<C3>(GetCorrectTerm(_terms[2], archetype));
-        _storage4 = archetype.GetStorage<C4>(GetCorrectTerm(_terms[3], archetype));
-        _storage5 = archetype.GetStorage<C5>(GetCorrectTerm(_terms[4], archetype));
-        _storage6 = archetype.GetStorage<C6>(GetCorrectTerm(_terms[5], archetype));
-        _storage7 = archetype.GetStorage<C7>(GetCorrectTerm(_terms[6], archetype));
-        _storage8 = archetype.GetStorage<C8>(GetCorrectTerm(_terms[7], archetype));
+        TrySetStorageAndOptional(archetype, 0, ref _storage1);
+        TrySetStorageAndOptional(archetype, 1, ref _storage2);
+        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 4, ref _storage4);
+        TrySetStorageAndOptional(archetype, 5, ref _storage5);
+        TrySetStorageAndOptional(archetype, 6, ref _storage6);
+        TrySetStorageAndOptional(archetype, 7, ref _storage7);
+        TrySetStorageAndOptional(archetype, 8, ref _storage8);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1274,16 +1373,23 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1[record.tableRow],
-                item2 = ref _storage2[record.tableRow],
-                item3 = ref _storage3[record.tableRow],
-                item4 = ref _storage4[record.tableRow],
-                item5 = ref _storage5[record.tableRow],
-                item6 = ref _storage6[record.tableRow],
-                item7 = ref _storage7[record.tableRow],
-                item8 = ref _storage8[record.tableRow],
+                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item3 = ref _storage3 == null ? ref ArraySingle<C3>.value[0] : ref _storage3[record.tableRow],
+                item4 = ref _storage4 == null ? ref ArraySingle<C4>.value[0] : ref _storage4[record.tableRow],
+                item5 = ref _storage5 == null ? ref ArraySingle<C5>.value[0] : ref _storage5[record.tableRow],
+                item6 = ref _storage6 == null ? ref ArraySingle<C6>.value[0] : ref _storage6[record.tableRow],
+                item7 = ref _storage7 == null ? ref ArraySingle<C7>.value[0] : ref _storage7[record.tableRow],
+                item8 = ref _storage8 == null ? ref ArraySingle<C8>.value[0] : ref _storage8[record.tableRow],
             };
         }
+    }
+
+    public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
+    {
+        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        if (storage != null)
+            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

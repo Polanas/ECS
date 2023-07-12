@@ -63,6 +63,18 @@ public sealed class Table
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TryGetStorage<T>(ulong type, out T[]? storage) where T : struct
+    {
+        storage = null;
+
+        if (!_indices.TryGetValue(type, out var index))
+            return false;
+
+        storage = Unsafe.As<T[]>(_storages[index]);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetStorage<T>(out T[]? storage) where T : struct
     {
         storage = null;

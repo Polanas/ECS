@@ -18,7 +18,7 @@ public readonly struct Relationship
 
     public static implicit operator ulong(Relationship relationship) => relationship.value;
 
-    public static implicit operator Relationship(ulong relationship) => new Relationship(null!, relationship);
+    public static implicit operator Relationship(ulong relationship) => new(null!, relationship);
 }
 
 public struct RelationshipEnumerator
