@@ -35,8 +35,8 @@ struct Likes { }
 
 struct MyRelation { }
 struct Color { }
-struct Green { int value; }
-struct Blue { int value; }
+struct Green { readonly int value; }
+struct Blue { readonly int value; }
 
 struct Size : IAutoReset<Size>
 {
@@ -551,8 +551,6 @@ public class UnitTests
 
         var filter = _world.Filter<Position>().All<Likes, Apples>().Build();
 
-        var pos = instanceOne.Get<Position>().Value;
-
         foreach (var entry in filter)
         {
             actual += entry.Item.x + entry.item.y;
@@ -995,7 +993,7 @@ public class UnitTests
 
         foreach (var entry in filter)
         {
-            if (filter.HasOptional1())
+            if (!entry.IsNull1())
             {
                 var position = entry.item1;
                 actual += position.x + position.y;

@@ -18,6 +18,9 @@ public ref struct Entry<C>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull() => Unsafe.IsNullRef(ref item);
 }
 
 public ref struct Entry<C1, C2>
@@ -39,6 +42,12 @@ public ref struct Entry<C1, C2>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item2;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
 }
 
 public ref struct Entry<C1, C2, C3>
@@ -68,6 +77,15 @@ public ref struct Entry<C1, C2, C3>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item3;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
 }
 
 public ref struct Entry<C1, C2, C3, C4>
@@ -105,6 +123,19 @@ public ref struct Entry<C1, C2, C3, C4>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item4;
     }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull4() => Unsafe.IsNullRef(ref item4);
 }
 
 public ref struct Entry<C1, C2, C3, C4, C5>
@@ -150,6 +181,21 @@ public ref struct Entry<C1, C2, C3, C4, C5>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item5;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull4() => Unsafe.IsNullRef(ref item4);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull5() => Unsafe.IsNullRef(ref item5);
 }
 
 public ref struct Entry<C1, C2, C3, C4, C5, C6>
@@ -203,6 +249,24 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item6;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull4() => Unsafe.IsNullRef(ref item4);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull5() => Unsafe.IsNullRef(ref item5);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull6() => Unsafe.IsNullRef(ref item6);
 }
 
 public ref struct Entry<C1, C2, C3, C4, C5, C6, C7>
@@ -264,6 +328,27 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6, C7>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item7;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull4() => Unsafe.IsNullRef(ref item4);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull5() => Unsafe.IsNullRef(ref item5);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull6() => Unsafe.IsNullRef(ref item6);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull7() => Unsafe.IsNullRef(ref item7);
 }
 
 public ref struct Entry<C1, C2, C3, C4, C5, C6, C7, C8>
@@ -333,4 +418,28 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6, C7, C8>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item8;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull1() => Unsafe.IsNullRef(ref item1);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull2() => Unsafe.IsNullRef(ref item2);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull3() => Unsafe.IsNullRef(ref item3);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull4() => Unsafe.IsNullRef(ref item4);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull5() => Unsafe.IsNullRef(ref item5);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull6() => Unsafe.IsNullRef(ref item6);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull7() => Unsafe.IsNullRef(ref item7);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsNull8() => Unsafe.IsNullRef(ref item8);
 }

@@ -129,33 +129,6 @@ public sealed class Table
         table.Count = 0;
     }
 
-    [Obsolete]
-    public static void MoveEntities(Archetype oldArchetype, Archetype newArchetype)
-    {
-        var oldTable = oldArchetype.Table;
-        var newTable = newArchetype.Table;
-
-        newArchetype.EnsureCapacity(newArchetype.Count + oldArchetype.Count);
-        newTable.EnsureCapacity(newTable.Count + oldTable.Count);
-
-        foreach (var (type, oldIndex) in oldTable._indices)
-        {
-            if (!newArchetype.Table._indices.TryGetValue(type, out var newIndex))
-                continue;
-
-            var oldStorage = oldTable._storages[oldIndex];
-            var newStorage = newTable._storages[newIndex];
-
-            Array.Copy(oldStorage, 0, newStorage, newTable.Count, oldTable.Count);
-        }
-
-        newTable.Count += oldTable.Count;
-        newArchetype.Count += oldArchetype.Count;
-
-        oldTable.Count = 0;
-        oldArchetype.RemoveAll();
-    }
-
     public static int MoveEntity(ulong entity, int oldArchetypeRow, int oldTableRow, Archetype oldArchetype, Archetype newArchetype, out int tableRow)
     {
         var oldTable = oldArchetype.Table;

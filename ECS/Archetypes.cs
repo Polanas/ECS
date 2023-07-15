@@ -1828,7 +1828,7 @@ public sealed class Archetypes
                 return false;
         }
 
-        if (!ArchetypeHasAnyType(archetype, anyComponents))
+        if (anyComponents.Count > 0 && !ArchetypeHasAnyType(archetype, anyComponents))
             return false;
 
         foreach (var allComponent in allComponents)
@@ -1982,7 +1982,7 @@ public sealed class Archetypes
         {
             if (!ComponentsCompatibleWith(onComponentSystem.allComponents,
                                          onComponentSystem.noneComponents,
-                                         onComponentSystem.allComponents,
+                                         onComponentSystem.anyComponents,
                                          archetype))
                 continue;
 

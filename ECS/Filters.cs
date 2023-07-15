@@ -430,9 +430,7 @@ public struct EnumeratorSingle<C> : IDisposable
         get => new()
         {
             entity = new Entity(_entityStorage[_entityIndex], _world),
-            item = ref _storage is null ?
-                   ref Unsafe.As<C[]>(_entityStorage)[0] :
-                   ref _storage[_entityIndex]
+            item = ref _storage is null ? ref Unsafe.As<C[]>(_entityStorage)[0] : ref _storage[_entityIndex]
         };
     }
 }
@@ -509,7 +507,7 @@ public struct Enumerator<C> : IDisposable
 
     public void Dispose() => _archetypes.Unlock();
 
-    public Entry<C> Current
+    public unsafe Entry<C> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -520,7 +518,7 @@ public struct Enumerator<C> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item = ref _storage == null ? ref ArraySingle<C>.value[0] : ref _storage[record.tableRow]
+                item = ref _storage == null ? ref Unsafe.AsRef<C>((void*)null) : ref _storage[record.tableRow]
             };
         }
     }
@@ -620,7 +618,7 @@ public struct Enumerator<C1, C2> : IDisposable
 
     public void Dispose() => _archetypes.Unlock();
 
-    public Entry<C1, C2> Current
+    public unsafe Entry<C1, C2> Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -631,8 +629,8 @@ public struct Enumerator<C1, C2> : IDisposable
             return new()
             {
                 entity = new Entity(entity, _world),
-                item1 = ref _storage1 == null ? ref ArraySingle<C1>.value[0] : ref _storage1[record.tableRow],
-                item2 = ref _storage2 == null ? ref ArraySingle<C2>.value[0] : ref _storage2[record.tableRow],
+                item1 = ref _storage1 == null ? ref Unsafe.AsRef<C1>((void*)null) : ref _storage1[record.tableRow],
+                item2 = ref _storage2 == null ? ref Unsafe.AsRef<C2>((void*)null) : ref _storage2[record.tableRow],
             };
         }
     }

@@ -84,7 +84,11 @@ public struct ComponentEnumerator
 public sealed class ECSWorld
 {
     public Archetypes Archetypes => _archetypes;
+    public int Index { get; private set; }
+
     internal static ECSWorld? Instance { get; private set; }
+    internal static List<ECSWorld> Worlds { get; private set; } = new();
+    internal static int WorldsLastIndex { get; private set; } = new();
 
     private readonly Archetypes _archetypes;
     private readonly List<ECSSystems> _ecsSystems;
@@ -98,6 +102,10 @@ public sealed class ECSWorld
         _archetypes = new(this);
 
         _ecsSystems = new();
+
+        Worlds.Add(this);
+        Index = WorldsLastIndex;
+        WorldsLastIndex++;
     }
 
     internal void AddSystems(ECSSystems systems)
@@ -746,6 +754,8 @@ public sealed class ECSWorld
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Destroy()
     {
+        Worlds.Remove(this);
+
         foreach (var systems in _ecsSystems)
             systems.Destroy();
     }
