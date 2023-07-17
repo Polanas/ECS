@@ -1,4 +1,5 @@
 using ECS;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECSTests;
 
@@ -1009,5 +1010,12 @@ public class UnitTests
         e2.Remove();
         
         Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void MyTestMethod()
+    {
+        var e = _world.AddEntity("hi!").Add<Tag>().Remove<Tag>();
+        e.Add<Velocity>();
     }
 }

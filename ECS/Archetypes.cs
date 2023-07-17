@@ -596,30 +596,38 @@ public sealed class Archetypes
     }
 
     /// <returns>True, if a new archetype didn't exsist previously. Otherwise, false.</returns>
-    public bool AddComponent(ulong typeIndex, Entity entity, out Archetype newArchetype, out int newTableRow, bool reuseTable = false, int customComponentsCapacity = -1)
+    public bool AddComponent(ulong component, Entity entity, out Archetype newArchetype, out int newTableRow, bool reuseTable = false, int customComponentsCapacity = -1)
     {
+#if DEBUG
+        if (!IsEntityAlive(entity))
+        {
+            var entityName = GetEntityNameOrValue(entity);
+            var componentName = GetComponentNameOrValue(component);
+            throw new Exception($"Cannot add a component {componentName} to a non-existant or not alive entity {entityName}");
+        }
+#endif
         int finalComponentsCapacity = customComponentsCapacity > 0 ? customComponentsCapacity : componentsCapacity;
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
 #if DEBUG
-        if (HasComponent(typeIndex, ref record))
+        if (HasComponent(component, ref record))
         {
             var entityName = GetEntityNameOrValue(entity);
-            var componentName = GetComponentNameOrValue(typeIndex);
+            var componentName = GetComponentNameOrValue(component);
             throw new Exception($"Entity {entityName} already has component {componentName}.");
         }
 #endif
 
-        var oldEdge = oldArchetype.GetTableEdge(typeIndex);
+        var oldEdge = oldArchetype.GetTableEdge(component);
         var newArchetypeRef = oldEdge.Add;
         newArchetype = ((Archetype?)newArchetypeRef?.Target)!;
 
         bool isNewArchetypeNull = newArchetype == null;
         if (isNewArchetypeNull)
         {
-            SortedSet<ulong> newTypes = new(oldArchetype.components) { typeIndex };
+            SortedSet<ulong> newTypes = new(oldArchetype.components) { component };
 
             newTypes.Remove(entityType);
             newArchetypeRef = TryGetArchetype(newTypes)!;
@@ -638,7 +646,7 @@ public sealed class Archetypes
             newArchetype = ((Archetype?)newArchetypeRef.Target)!;
 
             oldEdge.Add = newArchetypeRef;
-            var newEdge = newArchetype!.GetTableEdge(typeIndex);
+            var newEdge = newArchetype!.GetTableEdge(component);
             newEdge.Remove = oldArchetypeRef;
         }
 
@@ -660,11 +668,11 @@ public sealed class Archetypes
         return isNewArchetypeNull;
     }
 
-    public void AddComponent<T>(ulong typeIndex, Entity entity, T value, int customComponentsCapacity = -1) where T : struct
+    public void AddComponent<T>(ulong component, Entity entity, T value, int customComponentsCapacity = -1) where T : struct
     {
 #if DEBUG
         if (Unsafe.SizeOf<T>() == 1)
-            throw new Exception($"Cannot add a component {typeof(T).Name} with no data");
+            throw new Exception($"Cannot add a component {typeof(T).Name} with no data to {GetEntityNameOrValue(entity)}");
 #endif
 
         Type type = null!;
@@ -678,11 +686,11 @@ public sealed class Archetypes
             var oldArchetypeRef = _archetypes[record.archetypeId];
             var oldArchetype = ((Archetype?)oldArchetypeRef!.Target)!;
 
-            if (HasComponent(typeIndex, ref record))
+            if (HasComponent(component, ref record))
             {
 #if DEBUG
                 var entityName = GetEntityNameOrValue(entity);
-                var componentName = GetComponentNameOrValue(typeIndex);
+                var componentName = GetComponentNameOrValue(component);
                 throw new Exception($"Entity {entityName} already has component {componentName}.");
 #else
                 ref var item2 = ref oldArchetype.GetStorage<T>()[record.tableRow];
@@ -694,7 +702,7 @@ public sealed class Archetypes
             ref var item1 = ref AddArchetypeOperation<T>(entity, GetComponentIndex<T>(), ArchetypeOperationType.AddComponent);
 
             if (Pools<T>.Pool == null && fakeInstance is IAutoReset<T>)
-                AddPool<T>(typeIndex);
+                AddPool<T>(component);
 
             item1 = value;
             Pools<T>.Pool?.CallAutoReset(ref item1, AutoResetState.OnAdd);
@@ -702,13 +710,13 @@ public sealed class Archetypes
             return;
         }
 
-        bool isNewArchetypeNull = AddComponent(typeIndex, entity, out var newArchetype, out int newTableRow, false, customComponentsCapacity);
+        bool isNewArchetypeNull = AddComponent(component, entity, out var newArchetype, out int newTableRow, false, customComponentsCapacity);
 
         if (isNewArchetypeNull &&
             Pools<T>.Pool == null &&
             fakeInstance is IAutoReset<T>)
         {
-            AddPool<T>(typeIndex);
+            AddPool<T>(component);
         }
 
         ref var item = ref newArchetype.GetStorage<T>()[newTableRow];
@@ -716,14 +724,14 @@ public sealed class Archetypes
         item = value;
         Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnAdd);
 
-        if (typeIndex != componentType)
-            TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
+        if (component != componentType)
+            TryCallOnComponentAddSystems(entity, newArchetype, component);
     }
 
-    public void AddTagEvent<T>(ulong typeIndex, Entity entity) where T : struct
+    public void AddTagEvent<T>(ulong component, Entity entity) where T : struct
     {
-        if (TypeData.Components.Add(typeIndex))
-            AddComponent<Component>(componentType, typeIndex, default);
+        if (TypeData.Components.Add(component))
+            AddComponent<Component>(componentType, component, default);
 
         if (_locked)
         {
@@ -733,10 +741,10 @@ public sealed class Archetypes
             return;
         }
 
-        if (AddComponent(typeIndex, entity, out _, out _, true) &&
+        if (AddComponent(component, entity, out _, out _, true) &&
             default(T) is IAutoReset<T>)
         {
-            AddPool<T>(typeIndex);
+            AddPool<T>(component);
         }
     }
 
@@ -762,9 +770,9 @@ public sealed class Archetypes
 
     public EnumeratorSingleGetter<T> GetEvents<T>() where T : struct
     {
-        var typeIndex = GetComponentIndex<T>();
+        var componentIndex = GetComponentIndex<T>();
 
-        _archetypesByTypes.TryGetValue(typeIndex, out var archetypes);
+        _archetypesByTypes.TryGetValue(componentIndex, out var archetypes);
         var archetype = archetypes?.First();
 
         return new EnumeratorSingleGetter<T>(this, archetype);
@@ -781,47 +789,47 @@ public sealed class Archetypes
         return filter;
     }
 
-    public void AddEvent<T>(ulong typeIndex, Entity entity, T value) where T : struct
+    public void AddEvent<T>(ulong component, Entity entity, T value) where T : struct
     {
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
         if (Pools<T>.Pool == null && default(T) is IAutoReset<T>)
-            AddPool<T>(typeIndex);
+            AddPool<T>(component);
 
         if (_locked)
         {
             var type = typeof(T);
 
-            ref var item1 = ref AddArchetypeOperation<T>(entity, typeIndex, ArchetypeOperationType.AddComponent);
+            ref var item1 = ref AddArchetypeOperation<T>(entity, component, ArchetypeOperationType.AddComponent);
             item1 = value;
             return;
         }
 
-        if (HasComponent(typeIndex, ref record))
+        if (HasComponent(component, ref record))
         {
 #if DEBUG
             var entityName = GetEntityNameOrValue(entity);
-            var componentName = GetComponentNameOrValue(typeIndex);
+            var componentName = GetComponentNameOrValue(component);
             throw new Exception($"Entity {entityName} already has component {componentName}.");
 #else
             return;
 #endif
         }
 
-        var oldEdge = oldArchetype.GetTableEdge(typeIndex);
+        var oldEdge = oldArchetype.GetTableEdge(component);
         var newArchetype = ((Archetype?)oldEdge.Add?.Target)!;
 
         if (newArchetype == null)
         {
-            SortedSet<ulong> newTypes = new(oldArchetype.components) { typeIndex };
+            SortedSet<ulong> newTypes = new(oldArchetype.components) { component };
             newTypes.Remove(entityType);
             var newArchetypeRef = AddArchetype(new Table(this, newTypes, componentsCapacity, relationshipsCapacity), newTypes);
             newArchetype = ((Archetype?)newArchetypeRef.Target)!;
             oldEdge.Add = newArchetypeRef;
 
-            var newEdge = newArchetype.GetTableEdge(typeIndex);
+            var newEdge = newArchetype.GetTableEdge(component);
             newEdge.Remove = oldArchetypeRef;
         }
 
@@ -835,26 +843,26 @@ public sealed class Archetypes
         item = value;
         Pools<T>.Pool?.CallAutoReset(ref item, AutoResetState.OnAdd);
 
-        if (typeIndex != componentType)
-            TryCallOnComponentAddSystems(entity, newArchetype, typeIndex);
+        if (component != componentType)
+            TryCallOnComponentAddSystems(entity, newArchetype, component);
     }
 
-    public bool RemoveComponent(ulong typeIndex, Entity entity, out Archetype newArchetype, out bool isNewArchetypeNull, bool reuseTable = false)
+    public bool RemoveComponent(ulong component, Entity entity, out Archetype newArchetype, out bool isNewArchetypeNull, bool reuseTable = false)
     {
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var oldArchetypeRef = _archetypes[record.archetypeId];
         var oldArchetype = ((Archetype?)oldArchetypeRef.Target)!;
 
 #if DEBUG
-        if (!HasComponent(typeIndex, ref record))
+        if (!HasComponent(component, ref record))
         {
             var entityName = GetEntityNameOrValue(entity);
-            var componentName = GetComponentNameOrValue(typeIndex);
+            var componentName = GetComponentNameOrValue(component);
             throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
         }
 #endif
 
-        var oldEdge = oldArchetype.GetTableEdge(typeIndex);
+        var oldEdge = oldArchetype.GetTableEdge(component);
         var newArchetypeRef = oldEdge.Remove;
         newArchetype = ((Archetype?)newArchetypeRef?.Target)!;
 
@@ -862,7 +870,7 @@ public sealed class Archetypes
         if (isNewArchetypeNull && oldArchetype.components.Count > 1)
         {
             SortedSet<ulong> newTypes = new(oldArchetype.components);
-            newTypes.Remove(typeIndex);
+            newTypes.Remove(component);
             newArchetypeRef = TryGetArchetype(newTypes)!;
 
             Table newTable = null!;
@@ -879,7 +887,7 @@ public sealed class Archetypes
             newArchetype ??= ((Archetype?)newArchetypeRef.Target)!;
 
             oldEdge.Remove = newArchetypeRef;
-            var newEdge = newArchetype.GetTableEdge(typeIndex);
+            var newEdge = newArchetype.GetTableEdge(component);
             newEdge.Add = oldArchetypeRef;
         }
 
@@ -897,7 +905,7 @@ public sealed class Archetypes
         record.archetypeId = newArchetype!.id;
         record.archetypeRow = newArchetypeRow;
 
-        TryCallOnComponentRemoveSystems(entity, oldArchetype, typeIndex);
+        TryCallOnComponentRemoveSystems(entity, oldArchetype, component);
 
         if (oldArchetype!.components.Count == 1)
             RemoveEntity(entity);
@@ -905,7 +913,7 @@ public sealed class Archetypes
         return true;
     }
 
-    public bool RemoveComponent<T>(ulong typeIndex, Entity entity) where T : struct
+    public bool RemoveComponent<T>(ulong component, Entity entity) where T : struct
     {
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var oldArchetypeRef = _archetypes[record.archetypeId];
@@ -919,47 +927,47 @@ public sealed class Archetypes
 
         if (_locked)
         {
-            if (!HasComponent(typeIndex, ref record))
+            if (!HasComponent(component, ref record))
             {
 #if DEBUG
                 var entityName = GetEntityNameOrValue(entity);
-                var componentName = GetComponentNameOrValue(typeIndex);
+                var componentName = GetComponentNameOrValue(component);
                 throw new Exception($"Cannot add non-existent component {componentName} to entity {entityName}.");
 #else
                     return true;
 #endif
             }
 
-            AddArchetypeOperation(entity, typeIndex, ArchetypeOperationType.RemoveComponent);
+            AddArchetypeOperation(entity, component, ArchetypeOperationType.RemoveComponent);
             return true;
         }
 
-        bool removed = RemoveComponent(typeIndex, entity, out var archetype, out bool isNewArchetypeNull);
+        bool removed = RemoveComponent(component, entity, out var archetype, out bool isNewArchetypeNull);
 
         return removed;
     }
 
-    public ref T GetComponent<T>(ulong typeIndex, Entity entity) where T : struct
+    public ref T GetComponent<T>(ulong component, Entity entity) where T : struct
     {
-        GetComponent(typeIndex, entity, out var storage, out int row);
+        GetComponent(component, entity, out var storage, out int row);
         return ref ((T[])storage)[row];
     }
 
-    public void GetComponent(ulong typeIndex, Entity entity, out Array storage, out int tableRow)
+    public void GetComponent(ulong component, Entity entity, out Array storage, out int tableRow)
     {
         ref var record = ref _entityRecords[IdConverter.GetFirst(entity)];
         var archetypeRef = _archetypes[record.archetypeId];
 
 #if DEBUG
-        if (!HasComponent(typeIndex, ref record))
+        if (!HasComponent(component, ref record))
         {
             var entityName = GetEntityNameOrValue(entity);
-            var componentName = GetComponentNameOrValue(typeIndex);
+            var componentName = GetComponentNameOrValue(component);
             throw new Exception($"Cannot get non-existent component {componentName} from entity{entityName}");
         }
 #endif
 
-        storage = ((Archetype?)archetypeRef!.Target)!.GetStorage(typeIndex);
+        storage = ((Archetype?)archetypeRef!.Target)!.GetStorage(component);
         tableRow = record.tableRow;
     }
 
@@ -1058,9 +1066,9 @@ public sealed class Archetypes
         {
             if (listMask == null)
                 break;
-            var typeIndex = listMask.Value.allTypes.IndexOf(type);
+            var index = listMask.Value.allTypes.IndexOf(type);
 
-            if (optionalFlags.Get(typeIndex))
+            if (optionalFlags.Get(index))
                 typesToRemove.Add(type);
         }
 
@@ -1272,29 +1280,29 @@ public sealed class Archetypes
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasComponent(ulong typeIndex, ref EntityRecord record)
+    public bool HasComponent(ulong component, ref EntityRecord record)
     {
-        if (!_archetypesByTypes.TryGetValue(typeIndex, out var archetypes))
+        if (!_archetypesByTypes.TryGetValue(component, out var archetypes))
             return false;
 
         return record.archetypeRow != -1 && archetypes.Contains(((Archetype?)_archetypes[record.archetypeId].Target)!);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasComponent(ulong typeIndex, Entity entity)
+    public bool HasComponent(ulong component, Entity entity)
     {
         var record = _entityRecords[IdConverter.GetFirst(entity)];
 
-        if (!_archetypesByTypes.TryGetValue(typeIndex, out var archetypes))
+        if (!_archetypesByTypes.TryGetValue(component, out var archetypes))
             return false;
 
         return record.archetypeRow != -1 && archetypes.Contains(((Archetype?)_archetypes[record.archetypeId].Target)!);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool HasComponent(ulong typeIndex, Archetype archetype)
+    public bool HasComponent(ulong component, Archetype archetype)
     {
-        if (!_archetypesByTypes.TryGetValue(typeIndex, out var archetypes))
+        if (!_archetypesByTypes.TryGetValue(component, out var archetypes))
             return false;
 
         return archetypes.Contains(archetype);
@@ -1754,37 +1762,37 @@ public sealed class Archetypes
         RemoveComponent(relationship, entity, out _, out _, false);
     }
 
-    private void AddArchetypeOperation(Entity entity, ulong typeIndex, ArchetypeOperationType operationType, int index = -1)
+    private void AddArchetypeOperation(Entity entity, ulong component, ArchetypeOperationType operationType, int index = -1)
     {
-        _archetypeOperations.Add(new(operationType, typeIndex, entity, index));
+        _archetypeOperations.Add(new(operationType, component, entity, index));
     }
 
-    private ref T AddArchetypeOperation<T>(Entity entity, ulong typeIndex, ArchetypeOperationType operationType) where T : struct
+    private ref T AddArchetypeOperation<T>(Entity entity, ulong component, ArchetypeOperationType operationType) where T : struct
     {
-        if (!_archetypeOperationStorages.TryGetValue(typeIndex, out var storage))
+        if (!_archetypeOperationStorages.TryGetValue(component, out var storage))
         {
             var type = typeof(T);
             storage = new(Array.CreateInstance(type, _talbeOperationComponentsCapacity), type);
         }
 
-        _archetypeOperationStorages[typeIndex] = storage;
+        _archetypeOperationStorages[component] = storage;
         ref T value = ref storage.Add<T>(out int index);
-        AddArchetypeOperation(entity, typeIndex, operationType, index);
+        AddArchetypeOperation(entity, component, operationType, index);
 
         return ref value;
     }
 
-    private Array AddArchetypeOperation(Entity entity, ulong typeIndex, ArchetypeOperationType operationType, out int index)
+    private Array AddArchetypeOperation(Entity entity, ulong component, ArchetypeOperationType operationType, out int index)
     {
-        if (!_archetypeOperationStorages.TryGetValue(typeIndex, out var storage))
+        if (!_archetypeOperationStorages.TryGetValue(component, out var storage))
         {
-            var type = GetComponent<Component>(componentType, typeIndex).type;
+            var type = GetComponent<Component>(componentType, component).type;
             storage = new(Array.CreateInstance(type, _talbeOperationComponentsCapacity), type);
         }
 
-        _archetypeOperationStorages[typeIndex] = storage;
+        _archetypeOperationStorages[component] = storage;
         storage.Add(out index);
-        AddArchetypeOperation(entity, typeIndex, operationType, index);
+        AddArchetypeOperation(entity, component, operationType, index);
 
         return storage.array;
     }

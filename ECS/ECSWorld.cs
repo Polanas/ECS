@@ -585,18 +585,8 @@ public sealed class ECSWorld
             relationName = _archetypes.GetComponentNameOrValue(relation);
             targetName = _archetypes.GetComponentNameOrValue(target);
             entityName = _archetypes.GetEntityNameOrValue(entity);
-        }
-        if (Unsafe.SizeOf<T1>() != 1 && Unsafe.SizeOf<T2>() != 1)
-        {
-            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} and {targetName} contains data");
-        }
-        else if (Unsafe.SizeOf<T2>() != 1)
-        {
-            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {targetName} contains data");
-        }
-        else if (Unsafe.SizeOf<T1>() != 1)
-        {
-            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} contains data");
+
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} or {targetName} contain data");
         }
 #endif
 
@@ -612,6 +602,31 @@ public sealed class ECSWorld
         var relation = IndexOf<T1>();
         var target = IndexOf<T2>();
         var relationship = _archetypes.GetRelationship(relation, target);
+
+#if DEBUG
+        string relationshipName = string.Empty;
+        string relationName = string.Empty;
+        string targetName = string.Empty;
+        string entityName = string.Empty;
+
+        if (Unsafe.SizeOf<T1>() == 1 || Unsafe.SizeOf<T2>() != 1)
+        {
+            relationshipName = _archetypes.GetComponentNameOrValue(relationship);
+            relationName = _archetypes.GetComponentNameOrValue(relation);
+            targetName = _archetypes.GetComponentNameOrValue(target);
+            entityName = _archetypes.GetEntityNameOrValue(entity);
+        }
+
+        if (Unsafe.SizeOf<T1>() == 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} does not conatain any data");
+        }
+
+        if (Unsafe.SizeOf<T2>() != 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {targetName} conatains data");
+        }
+#endif
 
         if (Unsafe.SizeOf<T1>() == 1 && Unsafe.SizeOf<T2>() == 1)
         {
@@ -632,6 +647,32 @@ public sealed class ECSWorld
         var relation = IndexOf<T1>();
         var target = IndexOf<T2>();
         var relationship = _archetypes.GetRelationship(relation, target);
+
+
+#if DEBUG
+        string relationshipName = string.Empty;
+        string relationName = string.Empty;
+        string targetName = string.Empty;
+        string entityName = string.Empty;
+
+        if (Unsafe.SizeOf<T2>() == 1 || Unsafe.SizeOf<T1>() != 1)
+        {
+            relationshipName = _archetypes.GetComponentNameOrValue(relationship);
+            relationName = _archetypes.GetComponentNameOrValue(relation);
+            targetName = _archetypes.GetComponentNameOrValue(target);
+            entityName = _archetypes.GetEntityNameOrValue(entity);
+        }
+
+        if (Unsafe.SizeOf<T2>() == 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {targetName} does not conatain any data");
+        }
+
+        if (Unsafe.SizeOf<T1>() != 1)
+        {
+            throw new Exception($"Cannot add relationship {relationshipName} to entity {entityName}, as {relationName} conatains data");
+        }
+#endif
 
         if (Unsafe.SizeOf<T1>() == 1 && Unsafe.SizeOf<T2>() == 1)
         {
