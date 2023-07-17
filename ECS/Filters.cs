@@ -695,7 +695,7 @@ public struct Enumerator<C1, C2, C3> : IDisposable
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
         _entityStorage = archetype.Entities;
     }
 
@@ -812,8 +812,8 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
-        TrySetStorageAndOptional(archetype, 4, ref _storage4);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
+        TrySetStorageAndOptional(archetype, 3, ref _storage4);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -933,9 +933,9 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
-        TrySetStorageAndOptional(archetype, 4, ref _storage4);
-        TrySetStorageAndOptional(archetype, 5, ref _storage5);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
+        TrySetStorageAndOptional(archetype, 3, ref _storage4);
+        TrySetStorageAndOptional(archetype, 4, ref _storage5);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1057,10 +1057,10 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
         var archetype = _archetypesList[_archetypeIndex];
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
-        TrySetStorageAndOptional(archetype, 4, ref _storage4);
-        TrySetStorageAndOptional(archetype, 5, ref _storage5);
-        TrySetStorageAndOptional(archetype, 6, ref _storage6);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
+        TrySetStorageAndOptional(archetype, 3, ref _storage4);
+        TrySetStorageAndOptional(archetype, 4, ref _storage5);
+        TrySetStorageAndOptional(archetype, 5, ref _storage6);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1185,11 +1185,11 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
         var archetype = _archetypesList[_archetypeIndex];
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
-        TrySetStorageAndOptional(archetype, 4, ref _storage4);
-        TrySetStorageAndOptional(archetype, 5, ref _storage5);
-        TrySetStorageAndOptional(archetype, 6, ref _storage6);
-        TrySetStorageAndOptional(archetype, 7, ref _storage7);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
+        TrySetStorageAndOptional(archetype, 3, ref _storage4);
+        TrySetStorageAndOptional(archetype, 4, ref _storage5);
+        TrySetStorageAndOptional(archetype, 5, ref _storage6);
+        TrySetStorageAndOptional(archetype, 6, ref _storage7);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
@@ -1318,12 +1318,12 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        TrySetStorageAndOptional(archetype, 3, ref _storage3);
-        TrySetStorageAndOptional(archetype, 4, ref _storage4);
-        TrySetStorageAndOptional(archetype, 5, ref _storage5);
-        TrySetStorageAndOptional(archetype, 6, ref _storage6);
-        TrySetStorageAndOptional(archetype, 7, ref _storage7);
-        TrySetStorageAndOptional(archetype, 8, ref _storage8);
+        TrySetStorageAndOptional(archetype, 2, ref _storage3);
+        TrySetStorageAndOptional(archetype, 3, ref _storage4);
+        TrySetStorageAndOptional(archetype, 4, ref _storage5);
+        TrySetStorageAndOptional(archetype, 5, ref _storage6);
+        TrySetStorageAndOptional(archetype, 6, ref _storage7);
+        TrySetStorageAndOptional(archetype, 7, ref _storage8);
         _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
