@@ -1,15 +1,10 @@
 An Entity Component System library based on [RelECS](https://github.com/Byteron/RelEcs), with major inspiration from [ecslite](https://github.com/Leopotam/ecs) and [flecs](https://github.com/SanderMertens/flecs).
 
-Main features:
-* Heavy support of relationships
-* User-friendly API
-* Support of injection, system groups, prefabs and events
-
-> Note: don't forget to build in RELEASE when you don't need additional checks and helpful exceptions.
+> Note: don't forget to build in RELEASE if you don't need additional checks and helpful exceptions.
 
 ## Usage overview
 ### World
-A world stores entites, components, filters, etc.
+A world stores all the data related to the ECS, including entites, their components, etc.
 > Note: multiple worlds are not supported as for now.
 ```cs
 //creating a world
@@ -20,7 +15,7 @@ world.Destroy();
 ```
 
 ### Entities
-Entites are placeholders for components.
+Entites are simple indices. What each entity is is determined by their components.
 ```cs
 //creating an entity
 Entity entity = world.AddEntity();
@@ -32,9 +27,9 @@ bool alive = entity.IsAlive();
 entity.Remove();
 ```
 ### Components
+Components can be added to entites. They are represented as structs.
 > Note: if all components are deleted from an entity, the entity itself will be deleted.
 ```cs
-//components are represented as structs.
 struct Velocity { public float x, y; }
 //if a component doesn't contain any data, it's considered to be a tag, which makes it faster to add/remove
 struct IsDead { }
