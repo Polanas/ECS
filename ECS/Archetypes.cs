@@ -1187,6 +1187,7 @@ public sealed class Archetypes
         return index;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ulong GetComponentIndex<T>() where T : struct
     {
         ulong index = TypeData<T>.index;

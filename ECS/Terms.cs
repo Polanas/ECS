@@ -186,6 +186,12 @@ public readonly struct Term<C1, C2, C3>
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
         return _filterBuilder;
     }
+
+    public FilterBuilder<C1, C2, C3> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
+        return _filterBuilder;
+    }
 }
 
 public readonly struct Term<C1, C2, C3, C4>
@@ -244,6 +250,12 @@ public readonly struct Term<C1, C2, C3, C4>
         var relationship = IdConverter.Compose(first, second, true);
 
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
+        return _filterBuilder;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
         return _filterBuilder;
     }
 }
@@ -307,6 +319,12 @@ public readonly struct Term<C1, C2, C3, C4, C5>
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
         return _filterBuilder;
     }
+
+    public FilterBuilder<C1, C2, C3, C4, C5> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
+        return _filterBuilder;
+    }
 }
 
 public readonly struct Term<C1, C2, C3, C4, C5, C6>
@@ -367,6 +385,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6>
         var relationship = IdConverter.Compose(first, second, true);
 
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
+        return _filterBuilder;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4, C5, C6> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
         return _filterBuilder;
     }
 }
@@ -432,6 +456,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6, C7>
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
         return _filterBuilder;
     }
+
+    public FilterBuilder<C1, C2, C3, C4, C5, C6, C7> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
+        return _filterBuilder;
+    }
 }
 
 public readonly struct Term<C1, C2, C3, C4, C5, C6, C7, C8>
@@ -494,6 +524,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6, C7, C8>
         var relationship = IdConverter.Compose(first, second, true);
 
         _filterBuilder.listMask.allTypes[_componentIndex] = relationship;
+        return _filterBuilder;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8> Optional()
+    {
+        _filterBuilder.optionalFlags.Set(_componentIndex, true);
         return _filterBuilder;
     }
 }

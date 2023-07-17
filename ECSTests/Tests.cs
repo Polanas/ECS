@@ -1,5 +1,4 @@
 using ECS;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECSTests;
 
@@ -72,6 +71,7 @@ public class OnComponentSystemTest : OnComponentActionSystem
     {
         All<Position>();
         All<MyRelation, Wildcard>();
+        None<Position, Wildcard>();
     }
 
     public override void OnComponentAdd(Entity entity)
@@ -847,10 +847,12 @@ public class UnitTests
 
         _testActionSystems.Update();
 
-        var entity = _world.AddEntity().Add<Position>().Add<MyRelation, Apples>();
+        var entity = _world.AddEntity()
+            .Add<Position>()
+            .Add<MyRelation, Apples>();
         var entity1 = _world.AddEntity().Add<Position>();
         var entity2 = _world.AddEntity().Add<Likes, Apples>().Add<Position>().Add<MyRelation, Oranges>();
-        entity.Add<Velocity>().Remove<Velocity>();
+
         entity2.Remove<MyRelation, Oranges>();
 
         var actual = _testActionSystems.GetSystem<OnComponentSystemTest>().value;
