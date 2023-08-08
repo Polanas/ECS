@@ -750,19 +750,47 @@ public sealed class Archetypes
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong FindRelationship(Archetype archetype, ulong relationship, bool relationIsWildcard)
+    public void FindRelationships(
+        Archetype archetype,
+        ulong relationship,
+        bool relationIsWildcard,
+        List<ulong> result)
     {
         if (relationIsWildcard)
         {
             var targetToFind = IdConverter.GetSecond(relationship);
             foreach (var component in archetype.componentsArray)
-                if (IdConverter.GetSecond(relationship) == targetToFind)
+                if (IdConverter.GetSecond(component) == targetToFind)
+                    result.Add(component);
+
+            return;
+        }
+
+        var relationToFind = IdConverter.GetFirst(relationship);
+        foreach (var component in archetype.componentsArray)
+            if (IdConverter.GetFirst(component) == relationToFind)
+                result.Add(component);
+
+        return;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ulong FindRelationships(
+       Archetype archetype,
+       ulong relationship,
+       bool relationIsWildcard)
+    {
+        if (relationIsWildcard)
+        {
+            var targetToFind = IdConverter.GetSecond(relationship);
+            foreach (var component in archetype.componentsArray)
+                if (IdConverter.GetSecond(component) == targetToFind)
                     return component;
         }
 
         var relationToFind = IdConverter.GetFirst(relationship);
         foreach (var component in archetype.componentsArray)
-            if (IdConverter.GetFirst(relationship) == relationToFind)
+            if (IdConverter.GetFirst(component) == relationToFind)
                 return component;
 
         return 0;
@@ -1056,8 +1084,9 @@ public sealed class Archetypes
     public Filter GetFilter(
         Mask mask,
         ListMask? listMask,
-        Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter> createFilter,
+        Func<FilterData, Filter> createFilter,
         PackedBoolInt optionalFlags,
+        IterationMode[] iterationModes = null!,
         List<ulong> terms = null!)
     {
         List<ulong> typesToRemove = ListPool<ulong>.Get();
@@ -1113,7 +1142,16 @@ public sealed class Archetypes
         if (_archetypesByTypes.ContainsKey(firstType))
             FindArchetypesCompatibleWith(mask, optionalFlags, matchingArchetypes);
 
-        var newFilter = createFilter(this, mask, matchingArchetypes, terms, optionalFlags);
+        var filterData = new FilterData()
+        {
+            archetypes = this,
+            archetypesList = matchingArchetypes,
+            mask = mask,
+            terms = terms,
+            optionalFlags = optionalFlags,
+            iterationModes = iterationModes
+        };
+        var newFilter = createFilter(filterData);
         var newFilterRef = new WeakReference(newFilter);
         filterRefsList.Add(newFilterRef);
 

@@ -1,5 +1,14 @@
 ﻿namespace ECS;
 
+/// <summary>
+/// Allows same entities to be matched multiple times if set to <see cref="All"/>. Single by default.
+/// </summary>
+public enum IterationMode
+{
+    Single,
+    All
+}
+
 public readonly struct Term<C>
     where C : struct
 {
@@ -14,6 +23,12 @@ public readonly struct Term<C>
         _filterBuilder = filterBuilder;
         _component = component;
         _componentIndex = comopnentIndex;
+    }
+    
+    public FilterBuilder<C> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
     }
 
     public FilterBuilder<C> First<T>() where T : struct
@@ -79,6 +94,12 @@ public struct Term<C1, C2>
         _filterBuilder = filterBuilder;
         _component = component;
         _componentIndex = comopnentIndex;
+    }
+
+    public FilterBuilder<C1, C2> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
     }
 
     public FilterBuilder<C1, C2> First<T>() where T : struct
@@ -147,6 +168,12 @@ public readonly struct Term<C1, C2, C3>
         _componentIndex = comopnentIndex;
     }
 
+    public FilterBuilder<C1, C2, C3> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
+    }
+
     public FilterBuilder<C1, C2, C3> First<T>() where T : struct
     {
         var first = IdConverter.GetFirst(_archetypes.GetComponentIndex<T>());
@@ -211,6 +238,12 @@ public readonly struct Term<C1, C2, C3, C4>
         _filterBuilder = filterBuilder;
         _component = component;
         _componentIndex = comopnentIndex;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
     }
 
     public FilterBuilder<C1, C2, C3, C4> First<T>() where T : struct
@@ -280,6 +313,12 @@ public readonly struct Term<C1, C2, C3, C4, C5>
         _componentIndex = comopnentIndex;
     }
 
+    public FilterBuilder<C1, C2, C3, C4, C5> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
+    }
+
     public FilterBuilder<C1, C2, C3, C4, C5> First<T>() where T : struct
     {
         var first = IdConverter.GetFirst(_archetypes.GetComponentIndex<T>());
@@ -346,6 +385,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6>
         _filterBuilder = filterBuilder;
         _component = component;
         _componentIndex = comopnentIndex;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4, C5, C6> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5, C6> First<T>() where T : struct
@@ -417,6 +462,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6, C7>
         _componentIndex = comopnentIndex;
     }
 
+    public FilterBuilder<C1, C2, C3, C4, C5, C6, C7> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
+    }
+
     public FilterBuilder<C1, C2, C3, C4, C5, C6, C7> First<T>() where T : struct
     {
         var first = IdConverter.GetFirst(_archetypes.GetComponentIndex<T>());
@@ -485,6 +536,12 @@ public readonly struct Term<C1, C2, C3, C4, C5, C6, C7, C8>
         _filterBuilder = filterBuilder;
         _component = component;
         _componentIndex = comopnentIndex;
+    }
+
+    public FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8> IterationMode(IterationMode iterationMode)
+    {
+        _filterBuilder.iterationsModes[_componentIndex] = iterationMode;
+        return _filterBuilder;
     }
 
     public FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8> First<T>() where T : struct

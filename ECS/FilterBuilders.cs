@@ -8,8 +8,12 @@ public readonly struct FilterBuilder
     internal readonly PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter> _createFilter =
-        (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter(archetypes, mask, archetypesList, optionalFlags);
+    private static readonly Func<FilterData, Filter> _createFilter =
+        (filterData) => new Filter(
+            filterData.archetypes,
+            filterData.mask,
+            filterData.archetypesList,
+            filterData.optionalFlags);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -160,11 +164,13 @@ public struct FilterBuilder<C>
 {
     internal readonly Mask mask;
     internal readonly ListMask listMask;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[1];
+    //this HAS to be non-readonly, or the value won't be copied (without any erorrs >:()
     internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C>> _createFilter =
-        (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C>> _createFilter =
+        (filterData) => new Filter<C>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -313,7 +319,13 @@ public struct FilterBuilder<C>
     public Filter<C> Build()
     {
         FillMask();
-        var filter = (Filter<C>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -335,12 +347,13 @@ public struct FilterBuilder<C1, C2>
     where C2 : struct
 {
     internal readonly Mask mask;
-    internal readonly ListMask listMask;
+    internal ListMask listMask;
+    internal IterationMode[] iterationsModes = new IterationMode[2];
     internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2>> _createFilter =
-         (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2>> _createFilter =
+       (filterData) => new Filter<C1, C2>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -457,7 +470,13 @@ public struct FilterBuilder<C1, C2>
     public Filter<C1, C2> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -484,7 +503,7 @@ public struct FilterBuilder<C1, C2>
     }
 }
 
-public readonly struct FilterBuilder<C1, C2, C3>
+public struct FilterBuilder<C1, C2, C3>
     where C1 : struct
     where C2 : struct
     where C3 : struct
@@ -492,11 +511,12 @@ public readonly struct FilterBuilder<C1, C2, C3>
 
     internal readonly Mask mask;
     internal readonly ListMask listMask;
-    internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[3];
+    internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3>> _createFilter =
-         (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3>> _createFilter =
+         (filterData) => new Filter<C1, C2, C3>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -613,7 +633,13 @@ public readonly struct FilterBuilder<C1, C2, C3>
     public Filter<C1, C2, C3> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -645,7 +671,7 @@ public readonly struct FilterBuilder<C1, C2, C3>
     }
 }
 
-public readonly struct FilterBuilder<C1, C2, C3, C4>
+public struct FilterBuilder<C1, C2, C3, C4>
     where C1 : struct
     where C2 : struct
     where C3 : struct
@@ -654,11 +680,12 @@ public readonly struct FilterBuilder<C1, C2, C3, C4>
 
     internal readonly Mask mask;
     internal readonly ListMask listMask;
-    internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[4];
+    internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3, C4>> _createFilter =
-          (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3, C4>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3, C4>> _createFilter =
+          (filterData) => new Filter<C1, C2, C3, C4>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -775,7 +802,13 @@ public readonly struct FilterBuilder<C1, C2, C3, C4>
     public Filter<C1, C2, C3, C4> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3, C4>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3, C4>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -812,7 +845,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4>
     }
 }
 
-public readonly struct FilterBuilder<C1, C2, C3, C4, C5>
+public struct FilterBuilder<C1, C2, C3, C4, C5>
     where C1 : struct
     where C2 : struct
     where C3 : struct
@@ -822,11 +855,12 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5>
 
     internal readonly Mask mask;
     internal readonly ListMask listMask;
-    internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[5];
+    internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3, C4, C5>> _createFilter =
-         (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3, C4, C5>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3, C4, C5>> _createFilter =
+         (filterData) => new Filter<C1, C2, C3, C4, C5>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -943,7 +977,13 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5>
     public Filter<C1, C2, C3, C4, C5> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3, C4, C5>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3, C4, C5>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -985,7 +1025,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5>
     }
 }
 
-public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6>
+public struct FilterBuilder<C1, C2, C3, C4, C5, C6>
     where C1 : struct
     where C2 : struct
     where C3 : struct
@@ -996,11 +1036,12 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6>
 
     internal readonly Mask mask;
     internal readonly ListMask listMask;
-    internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[6];
+    internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3, C4, C5, C6>> _createFilter =
-          (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3, C4, C5, C6>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3, C4, C5, C6>> _createFilter =
+          (filterData) => new Filter<C1, C2, C3, C4, C5, C6>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -1117,7 +1158,13 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6>
     public Filter<C1, C2, C3, C4, C5, C6> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3, C4, C5, C6>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3, C4, C5, C6>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -1164,7 +1211,7 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6>
     }
 }
 
-public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7>
+public struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7>
     where C1 : struct
     where C2 : struct
     where C3 : struct
@@ -1176,11 +1223,12 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7>
 
     internal readonly Mask mask;
     internal readonly ListMask listMask;
-    internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[7];
+    internal PackedBoolInt optionalFlags;
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3, C4, C5, C6, C7>> _createFilter =
-            (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3, C4, C5, C6, C7>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3, C4, C5, C6, C7>> _createFilter =
+            (filterData) => new Filter<C1, C2, C3, C4, C5, C6, C7>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -1297,7 +1345,13 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7>
     public Filter<C1, C2, C3, C4, C5, C6, C7> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3, C4, C5, C6, C7>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3, C4, C5, C6, C7>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;
@@ -1363,10 +1417,11 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8>
     internal readonly Mask mask;
     internal readonly ListMask listMask;
     internal readonly PackedBoolInt optionalFlags;
+    internal readonly IterationMode[] iterationsModes = new IterationMode[8];
 
     private readonly Archetypes _arhcetypes;
-    private static readonly Func<Archetypes, Mask, List<Archetype>, List<ulong>, PackedBoolInt, Filter<C1, C2, C3, C4, C5, C6, C7, C8>> _createFilter =
-             (archetypes, mask, archetypesList, terms, optionalFlags) => new Filter<C1, C2, C3, C4, C5, C6, C7, C8>(archetypes, mask, archetypesList, terms, optionalFlags);
+    private static readonly Func<FilterData, Filter<C1, C2, C3, C4, C5, C6, C7, C8>> _createFilter =
+             (filterData) => new Filter<C1, C2, C3, C4, C5, C6, C7, C8>(filterData);
 
     public FilterBuilder(Archetypes archetypes)
     {
@@ -1483,7 +1538,13 @@ public readonly struct FilterBuilder<C1, C2, C3, C4, C5, C6, C7, C8>
     public Filter<C1, C2, C3, C4, C5, C6, C7, C8> Build()
     {
         FillMask();
-        var filter = (Filter<C1, C2, C3, C4, C5, C6, C7, C8>)_arhcetypes.GetFilter(mask, listMask, _createFilter, optionalFlags, listMask.allTypes);
+        var filter = (Filter<C1, C2, C3, C4, C5, C6, C7, C8>)_arhcetypes.GetFilter(
+            mask,
+            listMask,
+            _createFilter,
+            optionalFlags,
+            iterationsModes,
+            listMask.allTypes);
         ListMaskPool.Add(listMask);
 
         return filter;

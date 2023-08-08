@@ -41,8 +41,13 @@ public class Filter
     private readonly Mask _mask;
 
     internal PackedBoolInt optionalFlags;
+    internal IterationMode[] iterationModes = null!;
 
-    public Filter(Archetypes archetypes, Mask mask, List<Archetype> archetypesList, PackedBoolInt optionalFlags)
+    public Filter(
+        Archetypes archetypes,
+        Mask mask,
+        List<Archetype> archetypesList,
+        PackedBoolInt optionalFlags)
     {
         this.optionalFlags = optionalFlags;
         this.archetypesList = archetypesList;
@@ -89,18 +94,45 @@ public class Filter
     }
 }
 
+public struct FilterData
+{
+    internal Archetypes archetypes;
+    internal Mask mask;
+    internal List<Archetype> archetypesList;
+    internal List<ulong> terms;
+    internal PackedBoolInt optionalFlags;
+    internal IterationMode[] iterationModes;
+
+    public FilterData(
+        Archetypes archetypes,
+        Mask mask,
+        List<Archetype> archetypesList,
+        List<ulong> terms,
+        PackedBoolInt optionalFlags,
+        IterationMode[] iterationModes)
+    {
+        this.archetypes = archetypes;
+        this.mask = mask;
+        this.archetypesList = archetypesList;
+        this.terms = terms;
+        this.optionalFlags = optionalFlags;
+        this.iterationModes = iterationModes;
+    }
+}
+
 public class Filter<C> : Filter
     where C : struct
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-       Archetypes archetypes,
-       Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms,
-       PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+        filterData.archetypes,
+        filterData.mask,
+        filterData.archetypesList,
+        filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        iterationModes = filterData.iterationModes;
+        terms = filterData.terms.ToArray();
     }
 
     public new Enumerator<C> GetEnumerator()
@@ -115,13 +147,14 @@ public class Filter<C1, C2> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-        Archetypes archetypes,
-        Mask mask, List<Archetype> archetypesList,
-        List<ulong> terms,
-        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+         filterData.archetypes,
+         filterData.mask,
+         filterData.archetypesList,
+         filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2> GetEnumerator()
@@ -137,13 +170,14 @@ public class Filter<C1, C2, C3> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-        Archetypes archetypes,
-        Mask mask, List<Archetype> archetypesList,
-        List<ulong> terms,
-        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+        filterData.archetypes,
+        filterData.mask,
+        filterData.archetypesList,
+        filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3> GetEnumerator()
@@ -160,13 +194,14 @@ public class Filter<C1, C2, C3, C4> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-        Archetypes archetypes,
-        Mask mask, List<Archetype> archetypesList,
-        List<ulong> terms,
-        PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+        filterData.archetypes,
+        filterData.mask,
+        filterData.archetypesList,
+        filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3, C4> GetEnumerator()
@@ -184,13 +219,14 @@ public class Filter<C1, C2, C3, C4, C5> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-       Archetypes archetypes,
-       Mask mask, List<Archetype> archetypesList,
-       List<ulong> terms,
-       PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+        filterData.archetypes,
+        filterData.mask,
+        filterData.archetypesList,
+        filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3, C4, C5> GetEnumerator()
@@ -209,13 +245,14 @@ public class Filter<C1, C2, C3, C4, C5, C6> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-      Archetypes archetypes,
-      Mask mask, List<Archetype> archetypesList,
-      List<ulong> terms,
-      PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+          filterData.archetypes,
+          filterData.mask,
+          filterData.archetypesList,
+          filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6> GetEnumerator()
@@ -235,13 +272,14 @@ public class Filter<C1, C2, C3, C4, C5, C6, C7> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-         Archetypes archetypes,
-         Mask mask, List<Archetype> archetypesList,
-         List<ulong> terms,
-         PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+         filterData.archetypes,
+         filterData.mask,
+         filterData.archetypesList,
+         filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6, C7> GetEnumerator()
@@ -262,13 +300,14 @@ public class Filter<C1, C2, C3, C4, C5, C6, C7, C8> : Filter
 {
     internal readonly ulong[] terms;
 
-    public Filter(
-         Archetypes archetypes,
-         Mask mask, List<Archetype> archetypesList,
-         List<ulong> terms,
-         PackedBoolInt optionalFlags) : base(archetypes, mask, archetypesList, optionalFlags)
+    public Filter(FilterData filterData) : base(
+        filterData.archetypes,
+        filterData.mask,
+        filterData.archetypesList,
+        filterData.optionalFlags)
     {
-        this.terms = terms.ToArray();
+        terms = filterData.terms.ToArray();
+        iterationModes = filterData.iterationModes;
     }
 
     public new Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> GetEnumerator()
@@ -374,10 +413,10 @@ public struct EnumeratorSingle<C> : IDisposable
         archetypes.Lock();
         _world = archetypes.World;
 
-        UpdateStorage();
+        UpdateStorages();
     }
 
-    public void UpdateStorage()
+    public void UpdateStorages()
     {
         if (_archetype == null)
             return;
@@ -398,7 +437,7 @@ public struct EnumeratorSingle<C> : IDisposable
     {
         _entityIndex = -1;
 
-        UpdateStorage();
+        UpdateStorages();
     }
 
     public void Dispose() => _archetypes.Unlock();
@@ -421,15 +460,20 @@ public struct Enumerator<C> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
     private C[]? _storage;
 
-    public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
+    public Enumerator(
+        Archetypes archetypes,
+        List<Archetype> archetypesList,
+        ulong[] terms,
+        Filter<C> filter)
     {
-        _filter = filter;
+        _iterationModes = filter.iterationModes;
         _archetypesList = archetypesList;
         _archetypes = archetypes;
         _terms = terms;
@@ -437,19 +481,73 @@ public struct Enumerator<C> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
-        UpdateStorage();
+        _currentTerms = ListPool<List<ulong>>.Get();
+        _currentTerms.Add(ListPool<ulong>.Get());
+        UpdateStorages();
     }
 
-    public void UpdateStorage()
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage = TrySetStorageWithTems(archetype, 0, ref _storage!);
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
+    public void UpdateStorages()
     {
         if (_archetypeIndex == _archetypesList.Count)
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
+        _entityStorage = archetype.Entities;
+        if (archetype.Count == 0)
+            return;
 
         TrySetStorageAndOptional(archetype, 0, ref _storage);
-
-        _entityStorage = archetype.Entities;
     }
 
     public bool MoveNext()
@@ -463,6 +561,10 @@ public struct Enumerator<C> : IDisposable
             return true;
 
         _entityIndex = 0;
+
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -470,7 +572,7 @@ public struct Enumerator<C> : IDisposable
             _archetypeIndex++;
         }
 
-        UpdateStorage();
+        UpdateStorages();
 
         return _archetypeIndex < _archetypesList.Count && _entityIndex < _archetypesList[_archetypeIndex].Count;
     }
@@ -480,10 +582,19 @@ public struct Enumerator<C> : IDisposable
         _archetypeIndex = 0;
         _entityIndex = -1;
 
-        UpdateStorage();
+        UpdateStorages();
     }
 
-    public void Dispose() => _archetypes.Unlock();
+    public void Dispose()
+    {
+        _archetypes.Unlock();
+
+        foreach (var list in _currentTerms)
+        {
+            ListPool<ulong>.Add(list);
+        }
+        ListPool<List<ulong>>.Add(_currentTerms);
+    }
 
     public unsafe Entry<C> Current
     {
@@ -503,21 +614,9 @@ public struct Enumerator<C> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ulong GetCorrectTerm(ulong term, Archetype archetype)
-    {
-        var correctTerm = term;
-
-        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
-        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
-
-        if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
-
-        return correctTerm;
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 }
 
@@ -528,7 +627,8 @@ public struct Enumerator<C1, C2> : IDisposable
     private readonly List<Archetype> _archetypesList;
     private readonly Archetypes _archetypes;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private readonly ECSWorld _world;
     private int _archetypeIndex;
     private int _entityIndex;
@@ -538,7 +638,7 @@ public struct Enumerator<C1, C2> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
+        _iterationModes = filter.iterationModes;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -546,18 +646,79 @@ public struct Enumerator<C1, C2> : IDisposable
         archetypes.Lock();
         _world = archetypes.World;
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 2; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
+        _entityStorage = archetype.Entities;
+        if (archetype.Count == 0)
+            return;
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
-        _entityStorage = archetype.Entities;
     }
 
     public bool MoveNext()
@@ -571,6 +732,9 @@ public struct Enumerator<C1, C2> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -612,7 +776,9 @@ public struct Enumerator<C1, C2> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -624,7 +790,7 @@ public struct Enumerator<C1, C2> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -638,7 +804,8 @@ public struct Enumerator<C1, C2, C3> : IDisposable
     private readonly List<Archetype> _archetypesList;
     private readonly Archetypes _archetypes;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private readonly ECSWorld _world;
     private int _archetypeIndex;
     private int _entityIndex;
@@ -649,7 +816,6 @@ public struct Enumerator<C1, C2, C3> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -657,19 +823,81 @@ public struct Enumerator<C1, C2, C3> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 3; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
+        _entityStorage = archetype.Entities;
+        if (archetype.Count == 0)
+            return;
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
         TrySetStorageAndOptional(archetype, 2, ref _storage3);
-        _entityStorage = archetype.Entities;
     }
 
     public bool MoveNext()
@@ -683,6 +911,9 @@ public struct Enumerator<C1, C2, C3> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -725,7 +956,9 @@ public struct Enumerator<C1, C2, C3> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -737,7 +970,7 @@ public struct Enumerator<C1, C2, C3> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -753,7 +986,8 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
@@ -764,7 +998,6 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -772,20 +1005,83 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 4; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!) &
+            TrySetStorageWithTems(archetype, 3, ref _storage4!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return;
+        _entityStorage = _archetypesList[_archetypeIndex].Entities;
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
         TrySetStorageAndOptional(archetype, 2, ref _storage3);
         TrySetStorageAndOptional(archetype, 3, ref _storage4);
-        _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
     public bool MoveNext()
@@ -799,6 +1095,9 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -842,7 +1141,9 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -854,7 +1155,7 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -871,7 +1172,8 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
@@ -883,7 +1185,6 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -891,21 +1192,85 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 5; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!) &
+            TrySetStorageWithTems(archetype, 3, ref _storage4!) &
+            TrySetStorageWithTems(archetype, 4, ref _storage5!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
             return;
 
         var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return;
+        _entityStorage = _archetypesList[_archetypeIndex].Entities;
 
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
         TrySetStorageAndOptional(archetype, 2, ref _storage3);
         TrySetStorageAndOptional(archetype, 3, ref _storage4);
         TrySetStorageAndOptional(archetype, 4, ref _storage5);
-        _entityStorage = _archetypesList[_archetypeIndex].Entities;
     }
 
     public bool MoveNext()
@@ -919,6 +1284,9 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -963,7 +1331,9 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -975,7 +1345,7 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -993,7 +1363,8 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
@@ -1006,7 +1377,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -1014,8 +1384,71 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 6; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!) &
+            TrySetStorageWithTems(archetype, 3, ref _storage4!) &
+            TrySetStorageWithTems(archetype, 4, ref _storage5!) &
+            TrySetStorageWithTems(archetype, 5, ref _storage6!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
@@ -1042,6 +1475,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -1087,7 +1523,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1099,7 +1537,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -1118,7 +1556,8 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
@@ -1132,7 +1571,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _archetypes = archetypes;
         _terms = terms;
@@ -1140,8 +1578,72 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 7; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!) &
+            TrySetStorageWithTems(archetype, 3, ref _storage4!) &
+            TrySetStorageWithTems(archetype, 4, ref _storage5!) &
+            TrySetStorageWithTems(archetype, 5, ref _storage6!) &
+            TrySetStorageWithTems(archetype, 6, ref _storage7!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
@@ -1169,6 +1671,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -1215,7 +1720,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1227,7 +1734,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }
@@ -1247,7 +1754,8 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
     private readonly Archetypes _archetypes;
     private readonly ECSWorld _world;
     private readonly ulong[] _terms;
-    private readonly Filter _filter;
+    private readonly IterationMode[] _iterationModes = null!;
+    private readonly List<List<ulong>> _currentTerms;
     private int _archetypeIndex;
     private int _entityIndex;
     private ulong[] _entityStorage = null!;
@@ -1262,7 +1770,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
 
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
-        _filter = filter;
         _archetypesList = archetypesList;
         _terms = terms;
         _archetypes = archetypes;
@@ -1270,8 +1777,74 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
         _world = archetypes.World;
         archetypes.Lock();
 
+        _currentTerms = ListPool<List<ulong>>.Get();
+        for (int i = 0; i < 7; i++)
+            _currentTerms.Add(ListPool<ulong>.Get());
+
         UpdateStorage();
     }
+
+
+    public bool UpdateStoragesWithTerms()
+    {
+        if (_archetypeIndex == _archetypesList.Count)
+            return false;
+
+        var archetype = _archetypesList[_archetypeIndex];
+        if (archetype.Count == 0)
+            return false;
+
+        bool setStorage =
+            TrySetStorageWithTems(archetype, 0, ref _storage1!) &
+            TrySetStorageWithTems(archetype, 1, ref _storage2!) &
+            TrySetStorageWithTems(archetype, 2, ref _storage3!) &
+            TrySetStorageWithTems(archetype, 3, ref _storage4!) &
+            TrySetStorageWithTems(archetype, 4, ref _storage5!) &
+            TrySetStorageWithTems(archetype, 5, ref _storage6!) &
+            TrySetStorageWithTems(archetype, 6, ref _storage7!) &
+            TrySetStorageWithTems(archetype, 7, ref _storage8!);
+
+        return setStorage;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool TrySetStorageWithTems<T>(
+        Archetype archetype,
+        int componentIndex,
+        ref T[] storage) where T : struct
+    {
+        var currentTerms = _currentTerms[componentIndex];
+
+        if (_iterationModes[componentIndex] == IterationMode.Single)
+            return false;
+        if (currentTerms.Count == 0)
+            return false;
+
+        storage = archetype.GetStorage<T>(currentTerms[^1]);
+        currentTerms.RemoveAt(currentTerms.Count - 1);
+        return true;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public List<ulong> SetCorrectTerms(ulong term, Archetype archetype, int componentIndex)
+    {
+        List<ulong> terms = _currentTerms[componentIndex];
+
+        bool relationIsWildcard = IdConverter.GetFirst(term) == Archetypes.wildCard32;
+        bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
+
+        if (relationIsWildcard || targetIsWildcard)
+        {
+            _archetypes.FindRelationships(archetype, term, relationIsWildcard, terms);
+        }
+        else
+        {
+            terms.Add(term);
+        }
+
+        return terms;
+    }
+
     public void UpdateStorage()
     {
         if (_archetypeIndex == _archetypesList.Count)
@@ -1301,6 +1874,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
             return true;
 
         _entityIndex = 0;
+        if (UpdateStoragesWithTerms())
+            return true;
+
         _archetypeIndex++;
 
         while (_archetypeIndex < _archetypesList.Count && _archetypesList[_archetypeIndex].IsEmpty)
@@ -1348,7 +1924,9 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
 
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
-        archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
+        var terms = SetCorrectTerms(_terms[componentIndex], archetype, componentIndex);
+        archetype.TryGetStorage(terms[^1], out storage);
+        terms.RemoveAt(terms.Count - 1);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1360,7 +1938,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
         bool targetIsWildcard = IdConverter.GetSecond(term) == Archetypes.wildCard31;
 
         if (relationIsWildcard || targetIsWildcard)
-            correctTerm = _archetypes.FindRelationship(archetype, term, relationIsWildcard);
+            correctTerm = _archetypes.FindRelationships(archetype, term, relationIsWildcard);
 
         return correctTerm;
     }

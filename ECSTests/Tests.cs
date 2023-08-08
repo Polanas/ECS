@@ -982,16 +982,16 @@ public class UnitTests
         float expected = 11;
         float actual = 0;
 
-        var filter = _world.Filter<Position, Velocity>()
-            .Term1().Optional()
-            .Build();
-
         var e1 = _world.AddEntity()
             .Add<Position>(new() { x = 1, y = 1 })
             .Add<Velocity>(new() { x = 3, y = 2 });
 
         var e2 = _world.AddEntity()
             .Add<Velocity>(new() { x = 2, y = 2 });
+
+        var filter = _world.Filter<Position, Velocity>()
+            .Term1().Optional()
+            .Build();
 
         foreach (var entry in filter)
         {
@@ -1012,9 +1012,9 @@ public class UnitTests
     }
 
     [TestMethod]
-    public void MutipleDataComponentsOnEntityTest()
+    public void SingleIterationModeTest()
     {
-        int expected = 4;
+        int expected = 6;
         int actual = 0;
 
         var myTag1 = _world.AddEntity();
@@ -1022,12 +1022,83 @@ public class UnitTests
 
         var e1 = _world
             .AddEntity()
-            .Add<Position>(myTag1, new() { x = 2 })
-            .Add<Position>(myTag2, new() { y = 2 });
+            .Add<Position>(myTag1, new() { x = 5, y = 1 })
+            .Add<Position>(myTag2, new() { y = 3, x = 3 });
 
         var filter = _world
             .Filter<Position>()
             .Term1().Second<Wildcard>()
+            .Build();
+
+        foreach (var entry in filter)
+        {
+            actual += entry.item.x + entry.item.y;
+        }
+
+        e1.Remove();
+        myTag1.Remove();
+        myTag2.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    /// <summary>
+    /// If one or more storages can't be found, iteration is skipped, so in this there's only one iteration
+    /// </summary>
+    [TestMethod]
+    public void MultipleSingleIterationModeTest()
+    {
+        int expected = 40;
+        int actual = 0;
+
+        var myTag1 = _world.AddEntity();
+        var myTag2 = _world.AddEntity();
+
+        var e1 = _world
+            .AddEntity()
+            .Add<Position>(myTag1, new() { x = 10, y = 10 })
+            .Add<Position>(myTag2, new() { y = 3, x = 17 })
+            .Add<Velocity>(myTag2, new() { x = 5, y = 15 });
+
+        var filter = _world
+            .Filter<Position, Velocity>()
+            .Term1().Second<Wildcard>()
+            .Term2().Second<Wildcard>()
+            .Term1().IterationMode(IterationMode.All)
+            .Term2().IterationMode(IterationMode.All)
+            .Build();
+
+        foreach (var entry in filter)
+        {
+            actual += entry.item1.x + entry.item1.y;
+            actual += entry.item2.x + entry.item2.y;
+        }
+
+        e1.Remove();
+        myTag1.Remove();
+        myTag2.Remove();
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void AllIterationModeTest()
+    {
+        int expected = 10;
+        int actual = 0;
+
+        var myTag1 = _world.AddEntity();
+        var myTag2 = _world.AddEntity();
+
+        var e1 = _world
+            .AddEntity()
+            .Add<Position>(myTag1, new() { x = 2, y = 1 })
+            .Add<Position>(myTag2, new() { y = 3, x = 4 });
+
+        var filter = _world
+            .Filter<Position>()
+            .Term1().Second<Wildcard>()
+            .Term1().IterationMode(IterationMode.All)
             .Build();
 
         foreach (var entry in filter)

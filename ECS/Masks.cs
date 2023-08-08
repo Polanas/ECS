@@ -54,7 +54,7 @@ public readonly struct Mask
 }
 
 /// <summary>
-/// It's used alongsider regular masks, cause having lists off types is sometimes more convenient
+/// It's used alongsider regular masks, as having lists of types is sometimes more convenient
 /// </summary>
 public readonly struct ListMask
 {
