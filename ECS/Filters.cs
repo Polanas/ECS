@@ -41,7 +41,6 @@ public class Filter
     private readonly Mask _mask;
 
     internal PackedBoolInt optionalFlags;
-    internal PackedBoolInt currentOptionalFlags;
 
     public Filter(Archetypes archetypes, Mask mask, List<Archetype> archetypesList, PackedBoolInt optionalFlags)
     {
@@ -67,26 +66,6 @@ public class Filter
     {
         archetypesList.Add(archetype);
     }
-
-    public bool HasOptional1() => currentOptionalFlags.Get(0);
-
-    public bool HasOptional2() => currentOptionalFlags.Get(1);
-
-    public bool HasOptional3() => currentOptionalFlags.Get(2);
-
-    public bool HasOptional4() => currentOptionalFlags.Get(3);
-
-    public bool HasOptional5() => currentOptionalFlags.Get(4);
-
-    public bool HasOptional6() => currentOptionalFlags.Get(5);
-
-    public bool HasOptional7() => currentOptionalFlags.Get(6);
-
-    public bool HasOptional8() => currentOptionalFlags.Get(7);
-
-    internal void SetOptional(int type, bool value) => currentOptionalFlags.Set(type, value);
-
-    internal void ClearOptional() => currentOptionalFlags.Clear();
 
     public Enumerator GetEnumerator()
     {
@@ -468,7 +447,6 @@ public struct Enumerator<C> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _filter.ClearOptional();
         TrySetStorageAndOptional(archetype, 0, ref _storage);
 
         _entityStorage = archetype.Entities;
@@ -526,8 +504,6 @@ public struct Enumerator<C> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -579,7 +555,6 @@ public struct Enumerator<C1, C2> : IDisposable
 
         var archetype = _archetypesList[_archetypeIndex];
 
-        _filter.ClearOptional();
         TrySetStorageAndOptional(archetype, 0, ref _storage1);
         TrySetStorageAndOptional(archetype, 1, ref _storage2);
         _entityStorage = archetype.Entities;
@@ -638,8 +613,6 @@ public struct Enumerator<C1, C2> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -753,8 +726,6 @@ public struct Enumerator<C1, C2, C3> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -872,8 +843,6 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -995,8 +964,6 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1121,8 +1088,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1251,8 +1216,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1386,8 +1349,6 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
     public void TrySetStorageAndOptional<T>(Archetype archetype, int componentIndex, ref T[]? storage) where T : struct
     {
         archetype.TryGetStorage(GetCorrectTerm(_terms[componentIndex], archetype), out storage);
-        if (storage != null)
-            _filter.SetOptional(componentIndex, true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

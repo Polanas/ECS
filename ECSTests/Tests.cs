@@ -1,5 +1,4 @@
 using ECS;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECSTests;
 
@@ -1008,14 +1007,38 @@ public class UnitTests
 
         e1.Remove();
         e2.Remove();
-        
+
         Assert.AreEqual(expected, actual);
     }
 
     [TestMethod]
-    public void MyTestMethod()
+    public void MutipleDataComponentsOnEntityTest()
     {
-        var e = _world.AddEntity("hi!").Add<Tag>().Remove<Tag>();
-        e.Add<Velocity>();
+        int expected = 4;
+        int actual = 0;
+
+        var myTag1 = _world.AddEntity();
+        var myTag2 = _world.AddEntity();
+
+        var e1 = _world
+            .AddEntity()
+            .Add<Position>(myTag1, new() { x = 2 })
+            .Add<Position>(myTag2, new() { y = 2 });
+
+        var filter = _world
+            .Filter<Position>()
+            .Term1().Second<Wildcard>()
+            .Build();
+
+        foreach (var entry in filter)
+        {
+            actual += entry.item.x + entry.item.y;
+        }
+
+        e1.Remove();
+        myTag1.Remove();
+        myTag2.Remove();
+
+        Assert.AreEqual(expected, actual);
     }
 }
