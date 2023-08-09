@@ -817,6 +817,7 @@ public struct Enumerator<C1, C2, C3> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _terms = terms;
         _archetypes = archetypes;
         _entityIndex = -1;
@@ -999,6 +1000,7 @@ public struct Enumerator<C1, C2, C3, C4> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _terms = terms;
         _archetypes = archetypes;
         _entityIndex = -1;
@@ -1186,6 +1188,7 @@ public struct Enumerator<C1, C2, C3, C4, C5> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _terms = terms;
         _archetypes = archetypes;
         _entityIndex = -1;
@@ -1378,6 +1381,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _terms = terms;
         _archetypes = archetypes;
         _entityIndex = -1;
@@ -1572,6 +1576,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _archetypes = archetypes;
         _terms = terms;
         _entityIndex = -1;
@@ -1771,6 +1776,7 @@ public struct Enumerator<C1, C2, C3, C4, C5, C6, C7, C8> : IDisposable
     public Enumerator(Archetypes archetypes, List<Archetype> archetypesList, ulong[] terms, Filter filter)
     {
         _archetypesList = archetypesList;
+        _iterationModes = filter.iterationModes;
         _terms = terms;
         _archetypes = archetypes;
         _entityIndex = -1;
