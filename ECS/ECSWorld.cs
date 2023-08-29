@@ -114,6 +114,8 @@ public sealed class ECSWorld
         _archetypes.AddOnActionComponentsSystems(systems);
     }
 
+    public AllEntitiesEnumeratorGetter GetAllEntities() => _archetypes.GetAllEntities();
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Entity CopyEntity(Entity entityToCopy)
@@ -785,7 +787,7 @@ public sealed class ECSWorld
     public Archetype GetArchetype(Entity entity) => _archetypes.GetArchetype(entity);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public EnumeratorSingleGetter<T> GetEvents<T>() where T : struct, IEvent =>
+    public SingleEnumeratorGetter<T> GetEvents<T>() where T : struct, IEvent =>
         _archetypes.GetEvents<T>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1,11 +1,27 @@
 ﻿namespace ECS;
 
-public readonly struct EnumeratorSingleGetter<T> where T : struct
+public readonly struct AllEntitiesEnumeratorGetter
+{
+    private readonly EntityRecord[] _entityRecords;
+    private readonly int _entitiesAmount;
+    private readonly Archetypes _archetypes = null!;
+
+    public AllEntitiesEnumeratorGetter(Archetypes archetypes, EntityRecord[] entityRecords, int entitiesAmount)
+    {
+        _entitiesAmount = entitiesAmount;
+        _entityRecords = entityRecords;
+        _archetypes = archetypes;
+    }
+
+    public AllEntitiesEnumerator GetEnumerator() => new(_archetypes, _entityRecords, _entitiesAmount);
+}
+
+public readonly struct SingleEnumeratorGetter<T> where T : struct
 {
     private readonly Archetype? _archetype;
     private readonly Archetypes _archetypes;
 
-    public EnumeratorSingleGetter(Archetypes archetypes, Archetype? archetype)
+    public SingleEnumeratorGetter(Archetypes archetypes, Archetype? archetype)
     {
         _archetype = archetype;
         _archetypes = archetypes;

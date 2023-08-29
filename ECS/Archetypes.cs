@@ -217,7 +217,8 @@ public sealed class Archetypes
     private readonly Dictionary<ulong, IPool> _poolsByComponents;
     private EntityRecord[] _entityRecords;
     private readonly ECSWorld _world;
-    private uint _entityCount = 1;
+    private uint _maxEntityCount = 1;
+    private int _entityCount = 1;
     private bool _locked;
     private int _lockedCount;
 
@@ -455,15 +456,16 @@ public sealed class Archetypes
         var archetypeRow = archetype.Add(entityValue, out int tableRow);
         var id = IdConverter.GetFirst(entityValue);
 
-        if (_entityRecords.Length == _entityCount)
+        if (_entityRecords.Length == _maxEntityCount)
         {
-            Array.Resize(ref _entityRecords, (int)(_entityCount << 1));
-            Array.Fill(_entityRecords, new() { archetypeId = -1, archetypeRow = -1, tableRow = -1 }, (int)_entityCount, _entityRecords.Length - (int)_entityCount);
+            Array.Resize(ref _entityRecords, (int)(_maxEntityCount << 1));
+            Array.Fill(_entityRecords, new() { archetypeId = -1, archetypeRow = -1, tableRow = -1 }, (int)_maxEntityCount, _entityRecords.Length - (int)_maxEntityCount);
         }
 
         _entityRecords[id] = new EntityRecord() { archetypeRow = archetypeRow, tableRow = tableRow, archetypeId = archetype.id, entity = entityValue };
 
         ((Entity[])archetype.Storages[0])[archetypeRow] = entity;
+        _entityCount++;
 
         return entity;
     }
@@ -796,14 +798,19 @@ public sealed class Archetypes
         return 0;
     }
 
-    public EnumeratorSingleGetter<T> GetEvents<T>() where T : struct
+    public AllEntitiesEnumeratorGetter GetAllEntities()
+    {
+        return new AllEntitiesEnumeratorGetter(this, _entityRecords, _entityCount);
+    }
+
+    public SingleEnumeratorGetter<T> GetEvents<T>() where T : struct
     {
         var componentIndex = GetComponentIndex<T>();
 
         _archetypesByTypes.TryGetValue(componentIndex, out var archetypes);
         var archetype = archetypes?.First();
 
-        return new EnumeratorSingleGetter<T>(this, archetype);
+        return new SingleEnumeratorGetter<T>(this, archetype);
     }
 
     public Filter GetChildren(ulong entity)
@@ -1028,6 +1035,7 @@ public sealed class Archetypes
         record.additionalData.Clear();
 
         _unusedIds.Enqueue(entity);
+        _entityCount--;
     }
 
     public void RemoveEvents<T>(ulong eventIndex) where T : struct
@@ -1636,12 +1644,15 @@ public sealed class Archetypes
         var archetypeRow = archetype.Add(entityValue, out int tableRow);
         var id = IdConverter.GetFirst(entityValue);
 
-        if (_entityRecords.Length == _entityCount)
-            Array.Resize(ref _entityRecords, (int)(_entityCount << 1));
+        if (_entityRecords.Length == _maxEntityCount)
+            Array.Resize(ref _entityRecords, (int)(_maxEntityCount << 1));
 
         _entityRecords[id] = new EntityRecord() { archetypeRow = archetypeRow, tableRow = tableRow, archetypeId = archetype.id, entity = entityValue };
 
         AddComponent<Component>(componentType, entityValue, new() { type = type });
+
+        _entityCount++;
+
         return entity;
     }
 
@@ -2110,7 +2121,7 @@ public sealed class Archetypes
     private ulong GetNewEntity(bool isRelation)
     {
         if (_unusedIds.Count == 0)
-            return IdConverter.Compose(++_entityCount, 0, isRelation);
+            return IdConverter.Compose(++_maxEntityCount, 0, isRelation);
 
         var oldEntity = _unusedIds.Dequeue();
         IdConverter.SetSecond(ref oldEntity, (ushort)(IdConverter.GetSecond(oldEntity) + 1u));
