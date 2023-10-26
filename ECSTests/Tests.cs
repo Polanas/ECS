@@ -1171,25 +1171,29 @@ public class UnitTests
     [TestMethod]
     public void DeactivationWithLOTSOFChildrenTest()
     {
-        int expected = 0;
+        int expected = 200;
         int actual = 0;
 
         Entity[] children = new Entity[100];
-        var entity1 = _world.AddEntity().Add<Position>(new() { x = 1, y = 1 });
 
         for (int i = 0; i < children.Length; i++)
         {
             children[i] = _world.AddEntity().Add<Position>(new() { x = 1, y = 1 }).Deactivate();
         }
-
-        entity1.Deactivate();
-
         foreach (var entity in _world.Filter<Position>().Build())
         {
             actual += entity.item.x + entity.item.y;
         }
 
-        entity1.Remove();
+        for (int i = 0; i < children.Length; i++)
+        {
+            children[i].Activate();
+        }
+        foreach (var entity in _world.Filter<Position>().Build())
+        {
+            actual += entity.item.x + entity.item.y;
+        }
+
         for (int i = 0; i < children.Length; i++)
         {
             children[i].Remove();

@@ -1898,14 +1898,21 @@ public sealed class Archetypes
         if (!_archetypesByTypes.TryGetValue(chilfOfRelationship, out var archetypes))
             return;
 
+        var entites = new StackList<ulong>(stackalloc ulong[64]);
+
         foreach (var archetype in archetypes)
         {
             for (int i = 0; i < archetype.Count; i++)
             {
-                var child = new Entity(archetype.Entities[i], _world);
-                child.Remove<T>();
-                AddComponentToChildren<T>(child);
+                entites.Add(archetype.Entities[i]);
             }
+        }
+
+        for (int i = 0; i < entites.Count; i++)
+        {
+            var child = new Entity(entites[i], _world);
+            child.Remove<T>();
+            RemoveComponentToChildren<T>(child);
         }
     }
 
