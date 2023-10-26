@@ -31,7 +31,7 @@ public ref struct Entry<C1, C2>
     public ref C1 item1;
     public ref C2 item2;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -60,7 +60,7 @@ public ref struct Entry<C1, C2, C3>
     public ref C2 item2;
     public ref C3 item3;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -100,7 +100,7 @@ public ref struct Entry<C1, C2, C3, C4>
     public ref C4 item4;
     public Entity entity;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -152,7 +152,7 @@ public ref struct Entry<C1, C2, C3, C4, C5>
     public ref C4 item4;
     public ref C5 item5;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -214,7 +214,7 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6>
     public ref C5 item5;
     public ref C6 item6;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -287,7 +287,7 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6, C7>
     public ref C6 item6;
     public ref C7 item7;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;
@@ -371,7 +371,7 @@ public ref struct Entry<C1, C2, C3, C4, C5, C6, C7, C8>
     public ref C7 item7;
     public ref C8 item8;
 
-    public ref C1 Item
+    public ref C1 Item1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref item1;

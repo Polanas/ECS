@@ -178,7 +178,6 @@ public struct FilterBuilder<C>
         mask = MaskPool.Get();
         listMask = ListMaskPool.Get();
 
-        None<Prefab>();
         All<C>();
     }
 
@@ -319,6 +318,21 @@ public struct FilterBuilder<C>
     public Filter<C> Build()
     {
         FillMask();
+
+        var prefabIndex = _arhcetypes.GetComponentIndex<Prefab>();
+        var deactivatedIndex = _arhcetypes.GetComponentIndex<Deactivated>();
+
+        if (!mask.allTypes.Contains(_arhcetypes.GetComponentIndex<Prefab>()))
+        {
+            listMask.AddNone(prefabIndex);
+            mask.AddNone(prefabIndex);
+        }
+        if (!mask.allTypes.Contains(_arhcetypes.GetComponentIndex<Deactivated>()))
+        {
+            listMask.AddNone(deactivatedIndex);
+            mask.AddNone(deactivatedIndex);
+        }
+
         var filter = (Filter<C>)_arhcetypes.GetFilter(
             mask,
             listMask,

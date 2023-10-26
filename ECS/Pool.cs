@@ -4,30 +4,39 @@ namespace ECS;
 
 internal interface IPool
 {
-    void CallAutoReset(Entity entity, AutoResetState state);
+    void TryCallAutoReset(Entity entity, AutoResetState state);
+    object GetComponentAsObject(Array storage, int index);
+    void SetComponent(Array storage, int index, object component);
 }
 
 internal class Pool<T> : IPool where T : struct
 {
+    public readonly AutoReset<T>? autoReset;
     private readonly ECSWorld _world;
-    private readonly AutoReset<T> _autoReset;
 
-    public Pool(ECSWorld world, AutoReset<T> autoReset)
+    public Pool(ECSWorld world, AutoReset<T>? autoReset)
     {
         _world = world;
-        _autoReset = autoReset;
+        this.autoReset = autoReset;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void CallAutoReset(Entity enity, AutoResetState state)
+    public void TryCallAutoReset(Entity enity, AutoResetState state)
     {
+        if (autoReset == null)
+            return;
+
         var component = _world.GetComponent<T>(enity);
-        _autoReset.Invoke(ref component.Value, state);
+        autoReset.Invoke(ref component.Value, state);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void CallAutoReset(ref T c, AutoResetState state)
+    public object GetComponentAsObject(Array storage, int index)
     {
-        _autoReset.Invoke(ref c, state);
+        return Unsafe.As<T[]>(storage)[index];
+    }
+
+    public void SetComponent(Array storage, int index, object component)
+    {
+        Unsafe.As<T[]>(storage)[index] = (T)component;
     }
 }

@@ -6,13 +6,16 @@ public sealed class Table
 {
     public Array[] Storages => _storages;
     public SortedSet<ulong> Components => _components;
-    public int Count { get; private set; }
+    public int Count { get => _count; set => _count = value; }
 
     private readonly Array[] _storages;
     private readonly Dictionary<ulong, int> _indices;
     private readonly SortedSet<ulong> _components;
     private readonly Archetypes _archetypes;
-    private ulong[] _entites = null!; 
+    private readonly int _defaultCapacity;
+    private readonly int _relationshipCapacity;
+    private ulong[] _entites = null!;
+    private int _count;
 
     public Table(Archetypes archetypes, SortedSet<ulong> components, int defaultCapacity, int relationshipsCapacity)
     {
@@ -23,17 +26,25 @@ public sealed class Table
         _components = GetTypes(components);
         _storages = new Array[_components.Count];
 
+        _defaultCapacity = defaultCapacity;
+        _relationshipCapacity = relationshipsCapacity;
+
         int i = 0;
         foreach (var type in _components)
         {
             _indices.Add(type, i++);
         }
 
+        InitStorages(_storages);
+    }
+
+    private void InitStorages(Array[] storages)
+    {
         foreach (var (typeId, index) in _indices)
         {
             bool isDataRelatonship = _archetypes.IsDataRelationship(typeId);
             var typeIndex = isDataRelatonship ? _archetypes.GetDataRelationshipType(typeId) : TypeData.TypesByIndices[typeId];
-            _storages[index] = Array.CreateInstance(typeIndex, isDataRelatonship ? relationshipsCapacity : defaultCapacity);
+            _storages[index] = Array.CreateInstance(typeIndex, isDataRelatonship ? _relationshipCapacity : _defaultCapacity);
         }
     }
 
@@ -90,7 +101,7 @@ public sealed class Table
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int Add(Entity entity)
     {
-        EnsureCapacity(Count + 1);
+        EnsureCapacity(Count + 1, _storages, ref _entites);
         _entites[Count] = entity;
         return Count++;
     }
@@ -99,9 +110,6 @@ public sealed class Table
     public void Remove(int row)
     {
         Count--;
-
-        if (row >= Count)
-            return;
 
         foreach (var storage in _storages)
         {
@@ -176,21 +184,21 @@ public sealed class Table
         return newTypes;
     }
 
-    private void EnsureCapacity(int capacity)
+    private void EnsureCapacity(int capacity, Array[] storages, ref ulong[] entites)
     {
-        if (_storages.Length > 0 && capacity <= _storages[0].Length)
+        if (storages.Length > 0 && capacity <= storages[0].Length)
             return;
 
         var newCapacity = (capacity - 1) << 1;
 
-        for (int i = 0; i < _storages.Length; i++)
+        for (int i = 0; i < storages.Length; i++)
         {
-            var elementType = _storages[i].GetType().GetElementType()!;
+            var elementType = storages[i].GetType().GetElementType()!;
             var newStorage = Array.CreateInstance(elementType, newCapacity);
-            Array.Copy(_storages[i], newStorage, capacity - 1);
-            _storages[i] = newStorage;
+            Array.Copy(storages[i], newStorage, capacity - 1);
+            storages[i] = newStorage;
         }
 
-        Array.Resize(ref _entites, newCapacity);
+        Array.Resize(ref entites, newCapacity);
     }
 }

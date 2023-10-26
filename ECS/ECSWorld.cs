@@ -294,6 +294,25 @@ public sealed class ECSWorld
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void ActivateEntity(Entity entity)
+    {
+        _archetypes.ActivateEntity(entity);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void DeactivateEnity(Entity entity)
+    {
+        _archetypes.DeactivateEntity(entity);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public bool IsActive(Entity entity)
+    {
+        ref var record = ref _archetypes.GetEntityRecord(entity);
+        return record.IsActive();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool RelationshipHasTarget<T>(ulong relationship) where T : struct =>
         IdConverter.GetFirst(relationship) == IdConverter.GetFirst(IndexOf<T>());
 
@@ -456,7 +475,7 @@ public sealed class ECSWorld
 
         if (HasComponent<T>(index))
         {
-            _archetypes.GetComponent<T>(index, index) = value;
+            _archetypes.GetComponentAsObject<T>(index, index) = value;
             return;
         }
 

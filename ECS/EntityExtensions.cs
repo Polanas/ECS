@@ -4,6 +4,22 @@ namespace ECS;
 
 public static class EntityExtensions
 {
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Entity Activate(this Entity entity)
+    {
+        entity.world.ActivateEntity(entity);
+        return entity;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Entity Deactivate(this Entity entity)
+    {
+        entity.world.DeactivateEnity(entity);
+        return entity;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsActive(this Entity entity) => entity.world.IsActive(entity);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Entity Copy(this Entity entity) => entity.world.CopyEntity(entity);
@@ -42,6 +58,8 @@ public static class EntityExtensions
 
         if (world.Archetypes.EntityHasName(entity, 0))
             world.Archetypes.ChangeEntityNameParent(entity, 0, parent);
+        if (!parent.IsActive())
+            entity.Deactivate();
 
         return entity;
     }

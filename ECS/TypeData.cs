@@ -2,12 +2,12 @@
 
 namespace ECS;
 
-public static class TypeData<T> where T : struct
+internal static class TypeData<T> where T : struct
 {
     public static ulong index;
 }
 
-public static class TypeData
+internal static class TypeData
 {
     public static Dictionary<ulong, Type> TypesByIndices { get; private set; } = new();
     public static Dictionary<Type, ulong> IndicesByTypes { get; private set; } = new();
