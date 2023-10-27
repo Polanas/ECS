@@ -389,7 +389,7 @@ var sharedData = systems.GetShared<SharedData>();
 ```
 
 #### Entity deactivation
-Any entity can be deactivated. If an entity is deactivated, it will be excluded from all filters. All other properties stay the same though.
+Any entity can be deactivated, in which case it will be excluded from all filters. All other properties stay the same though.
 > Note: Deactivation/Reactivation also recursively affects children of an entity, children's children an so on.
 ```cs
 var myEntity = world.AddEntity().Deactivate();
