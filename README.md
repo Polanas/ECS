@@ -251,15 +251,6 @@ class OnComponentSystemTest : OnComponentActionSystem
     }
 }
 ```
-#### Shared Data
-A single instance of an object can be stored in a world to be accessed later.
-```cs
-class SharedData
-{
-    public readonly Window gameWindow;
-    public float deltaTime;
-}
-...
 
 var systems = new ECSSystems(world, new SharedData { ... });
 
@@ -384,3 +375,18 @@ systems
     .DeleteHere<PLayerDiedEvent>()
     .Init();
 ```
+
+### Other Features
+#### Shared Data
+A single instance of an object can be stored in a world to be accessed later.
+```cs
+class SharedData
+{
+    public readonly Window gameWindow;
+    public float deltaTime;
+}
+...
+
+#### Entity deactivation
+Any entity can be deactivated. If an entity is deactivated, it will be excluded from all filters. All other properties stay the same though.
+> Note: Deactivation/Reactivation also recursively affects children of an entity, children's children an so on.
