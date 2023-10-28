@@ -303,11 +303,17 @@ class LevelService
 class LevelSystem : IInitSystem
 {
     private readonly CustomInject<LevelService> _levelService;
+    //use Any, None or All objects to add additional arguments to a filter
+    private readonly FilterInject<Sprite, Transform> _sprites = new(new None<InvisibleSprite>());
 
     public void Init(ECSSystems systems)
     {
        //LevelService is ready to use
        var levelService = _levelService.Instance;
+       foreach (var entry in _sprites)
+       {
+           ...
+       }
        ...
     }
 }
