@@ -56,7 +56,7 @@ public struct EntityWithComponent<T> where T : struct
     }
 }
 
-public readonly struct Entity
+public readonly struct Entity : IEquatable<Entity>
 {
     public static Entity Wildcard { get; } = IdConverter.Compose(uint.MaxValue, uint.MaxValue, false);
 
@@ -82,4 +82,6 @@ public readonly struct Entity
 
     public override int GetHashCode() =>
         value.GetHashCode();
+
+    public bool Equals(Entity other) => other.value == value;
 }

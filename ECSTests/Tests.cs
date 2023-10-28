@@ -1,4 +1,5 @@
 using ECS;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ECSTests;
 
@@ -1198,6 +1199,30 @@ public class UnitTests
         {
             children[i].Remove();
         }
+
+        Assert.AreEqual(expected, actual);
+    }
+
+    [TestMethod]
+    public void EntityDictionaryTest()
+    {
+        int expected = 6;
+        int actual = 0;
+
+        var dict = new Dictionary<Entity, Position>();
+
+        var entity1 = _world.AddEntity();
+        var entity2 = _world.AddEntity();
+
+        dict.Add(entity1, new Position { x = 1, y = 1 });
+        dict.Add(entity2, new Position { x = 2, y = 2 });
+
+        var pos1 = dict[entity1];
+        var pos2 = dict[entity2];
+        actual = pos1.x + pos1.y + pos2.x + pos2.y;
+
+        entity1.Remove();
+        entity2.Remove();
 
         Assert.AreEqual(expected, actual);
     }
