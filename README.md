@@ -15,7 +15,8 @@ world.Destroy();
 ```
 
 ### Entities
-Each entity is a unique ID, which is associated with a set of components. 
+Each entity is a unique ID, which is associated with a set of components.
+> Note: IDs of deleted entities will be reused, so if you save entities for later use, it's recommended to ensure they are alive before doing so.
 ```cs
 //creating an entity
 Entity entity = world.AddEntity();
