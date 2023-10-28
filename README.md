@@ -117,8 +117,8 @@ foreach (var child in solarSystem.GetChildren())
 }
 ```
 ### Filters
-Filters well, *filter* entities by components (or absence of them) and access their values.
-To get a reference to a component type, specify it as genetic argument of ECSWorld.Filter<..>() methods.
+Filters, well, *filter* entities by their components (or absence of them) and help accessing their values.
+To be able to read/write to a component, specify it as genetic argument of ECSWorld.Filter<..>() methods.
 ```cs
 //creating a filter of entities with position
 var positionFilter = world.Filter<Position>().Build();
@@ -134,7 +134,7 @@ foreach (var entry in filter)
 var complexFilter = world.Filter<Velocity>().All<Position>().None<Likes, Apples>().All<Hates, Wildcard>().Any<Has, Dogs>().Any<Has, Cats>().Build();
 ```
 #### Wildcard
-Filtering by relationships is cool and all, but sometimes it isn't flexible enough. *Wildcards* can replace any part of a relationships to include all relationships which match the specified pattern
+Filtering by relationships is cool and all, but sometimes it isn't flexible enough. *Wildcards* can replace any part of a relationships to include all relationships which match the specified pattern.
 ```cs
 //finds all children who have some relation to apples
 var allChildrenFilter = world.Filter().All<ChildOf, Wildcard>().All<Wildcard, Apples>().Build();
@@ -179,14 +179,13 @@ foreach (var entry in filter)
 ### Systems
 Systems run all the logic; they are represented as classes which can implement a bunch of interfaces (IUpdateSystem, IPostUpdateSystem, IInitSystem, IPreInitSystem, IDestroySystem).
 ```cs
-//systems are classes
 class MoveSystem : IInitSystem, IUpdateSystem
 {
     private Filter<Position, Speed> _movableFilter;
 
     public void Init(ECSSystems systems)
     {
-        //it's recommended to cache filters instead of creatin
+        //it's recommended to cache filters instead of creating them every frame
         _movableFilter = systems.World.Filter<Position, Speed>
     }
 
@@ -212,7 +211,7 @@ systems
 ...
 
 //systems are executed in the order they were added
-systems.Update(); //preApdate and update are called here
+systems.Update(); //PreUpdate and Update are called here
 ```
 #### System groups
 Systems can be grouped; groups are assigned with a name, which can later be used to toggle groups on or off.
@@ -228,16 +227,16 @@ systems
 ...
 
 //now gameLoop group is active
-_serviceSystems.SetGroupState("gameLoop", true);
+systems.SetGroupState("gameLoop", true);
 ```
 #### OnComponentAction Systems
-These systems subscribe to addition and removal of certain components.
+These systems provide a callback when addition and removal of certain components happen.
 ```cs
 class OnComponentSystemTest : OnComponentActionSystem
 {
     public OnComponentSystemTest()
     {
-        //you can also use None() and Any() here
+        //one can also use None() and Any() here
         All<Position>();
     }
 
@@ -248,7 +247,7 @@ class OnComponentSystemTest : OnComponentActionSystem
 
     public override void OnComponentRemove(Entity entity)
     {
-        Console.WriteLine($"Position component was removed to {entity}!");
+        Console.WriteLine($"Position component was removed from {entity}!");
     }
 }
 ```
@@ -270,7 +269,7 @@ var camera = world.AddEntity("camera");
 var camera = world.AddEntity().ChildOf(player).Name("camera");
 ```
 ### Prefabs
-Sometimes it's useful to have some kind of a base entity, which other entities can "inherit" components from — that's what prefabs are. They can also be used to change the value of all "inherited" components of all prefab instances.
+Sometimes it's useful to have some kind of a base entity, which other entities can inherit components from — that's what prefabs are. They can also be used to change the value of all inherited components of all prefab instances.
 ```cs
 var enemyPrefab = _world.AddPrefab()
     .Add<Position>()
@@ -284,7 +283,7 @@ var enemy = _world.AddEntity().InstanceOf(enemyPrefab);
 _world.SetPrefabValue(enemyPrefab, new Position { x = 10, y = 10 });
 
 var yellow = 5;
-//If you want to replace some fields and keep others, also pass a delegate. second argument is used to temporarily store temporarily valuesc
+//If you want to replace some fields and keep others, also pass a delegate. second argument is used to store a temporary value
 _world.SetPrefabValue(enemyPrefab,
                       new Renderable { color = yellow },
                       static (ref Renderable c, Renderable temp) =>
@@ -293,7 +292,7 @@ _world.SetPrefabValue(enemyPrefab,
                       });
 ```
 ### Dependency Injection
-This feature lets one inject classes and filters in systems.
+This feature lets one inject classes and filters in systems without having to initialize them manually.
 ```cs
 
 class LevelService
