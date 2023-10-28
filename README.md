@@ -399,6 +399,6 @@ Any entity can be deactivated, in which case it will be excluded from all filter
 > Note: Deactivation/Reactivation also recursively affects children of an entity, children's children an so on.
 ```cs
 var myEntity = world.AddEntity().Deactivate();
-bool Is active = myEntity.IsActive();
+bool IsActive = myEntity.IsActive();
 entity.Activate();
 ```
