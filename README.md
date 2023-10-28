@@ -76,13 +76,13 @@ struct Likes { }
 var ann = world.AddEntity();
 var bob = world.AddEntity();
 
-//Ann like bob
+//Ann likes bob
 ann.Add<Likes>(bob);
 
-//does bob like ann? (Apparently, no)
+//does bob like Ann? (Apparently, no)
 bool likesAnn = bob.Has<Likes>(ann);
 
-//ann no longer likes bob
+//Ann no longer likes bob
 ann.Remove<Likes>(bob);
 ``` 
 #### Data Relationships
@@ -94,7 +94,7 @@ struct End { }
 ...
 
 var animation = world.AddEntity();
-//as (Begin, Position) and (End, Position) have different ids, we can store multiple instances of the same data type
+//as (Begin, Position) and (End, Position) have different IDs, one can store multiple instances of the same data type
 animation.Add<Begin, Position>();
 animation.Add<End, Position>(new Position { x = 20, y = 40 });
 
