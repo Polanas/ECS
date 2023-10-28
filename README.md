@@ -15,7 +15,7 @@ world.Destroy();
 ```
 
 ### Entities
-Entites are simple indices. What each entity is is determined by their components.
+Each entity is a unique ID, which is associated with a set of components. 
 ```cs
 //creating an entity
 Entity entity = world.AddEntity();
